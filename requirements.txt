@@ -1,0 +1,6 @@
+fpdf
+matplotlib
+numpy
+pandas
+scikit-learn
+sqlite3; sys_platform != 'win32'
