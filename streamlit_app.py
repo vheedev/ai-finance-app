@@ -23,7 +23,7 @@ st.markdown(
 
 with col2:
     st.markdown(
-        "<div style='display: flex; align-items: center; height: 60px;'>"
+        "<div style='display: flex; align-items: center; height: 80px;'>"
         "<h1 style='margin: 0;'>Fintari</h1>"
         "</div>",
         unsafe_allow_html=True,
