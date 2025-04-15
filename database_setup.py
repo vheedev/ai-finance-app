@@ -1,76 +1,36 @@
-import sqlite3
+# database_setup.py
 
-DB_NAME = "finance_app.db"
+import pandas as pd
+import os
+import hashlib
 
-# Initialize database
+DB_FILE = "users.csv"
 
-def init_db():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
 
-    # Users table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
-        )
-    ''')
+def register_user(username, password):
+    if not os.path.exists(DB_FILE):
+        df = pd.DataFrame(columns=["username", "password"])
+    else:
+        df = pd.read_csv(DB_FILE)
 
-    # Transactions table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            date TEXT NOT NULL,
-            description TEXT NOT NULL,
-            amount REAL NOT NULL,
-            type TEXT NOT NULL,
-            account TEXT NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        )
-    ''')
+    if username in df["username"].values:
+        return False, "Username already exists."
 
-    conn.commit()
-    conn.close()
+    hashed_pw = hash_password(password)
+    new_user = pd.DataFrame([{"username": username, "password": hashed_pw}])
+    df = pd.concat([df, new_user], ignore_index=True)
+    df.to_csv(DB_FILE, index=False)
+    return True, "Registration successful."
 
-# Sample insertion
+def login_user(username, password):
+    if not os.path.exists(DB_FILE):
+        return False, "No users registered yet."
 
-def insert_sample_transactions(user_id):
-    transactions = [
-        (user_id, "2025-04-01", "Gaji Bulanan", 7000000, "income", "BCA"),
-        (user_id, "2025-04-02", "Belanja Tokopedia via GoPay", -1500000, "expense", "GoPay"),
-        (user_id, "2025-04-03", "Investasi Mandiri", -3000000, "expense", "Mandiri"),
-        (user_id, "2025-04-04", "Modal Dagang Shopee", -2000000, "expense", "ShopeePay"),
-        (user_id, "2025-04-05", "Penjualan via Moka POS", 2500000, "income", "Moka POS"),
-        (user_id, "2025-04-08", "Penjualan Tokopedia", 1500000, "income", "Tokopedia"),
-        (user_id, "2025-04-09", "Beli bahan baku Tokopedia", -500000, "expense", "Tokopedia"),
-        (user_id, "2025-04-10", "Bayar Listrik PLN", -500000, "expense", "BCA"),
-        (user_id, "2025-04-12", "Makan Siang", -100000, "expense", "GoPay"),
-    ]
+    df = pd.read_csv(DB_FILE)
+    hashed_pw = hash_password(password)
 
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.executemany('''
-        INSERT INTO transactions (user_id, date, description, amount, type, account)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', transactions)
-    conn.commit()
-    conn.close()
-
-# Utility to fetch transactions
-
-def get_transactions(user_id):
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute("SELECT date, description, amount, type, account FROM transactions WHERE user_id=?", (user_id,))
-    rows = cursor.fetchall()
-    conn.close()
-    return [
-        {"date": row[0], "description": row[1], "amount": row[2], "type": row[3], "account": row[4]}
-        for row in rows
-    ]
-
-if __name__ == "__main__":
-    init_db()
-    print("✅ Database initialized. Run insert_sample_transactions(user_id) manually to insert demo data.")
+    if ((df["username"] == username) & (df["password"] == hashed_pw)).any():
+        return True, "Login successful."
+    return False, "Invalid username or password."
