@@ -72,30 +72,31 @@ if "logged_in" not in st.session_state:
     st.session_state.user_id = None
     st.session_state.username = ""
 
-if choice == "Register":
-    st.subheader("Register")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Register"):
-        user_id, msg = register_user(username, password)
-        if user_id:
-            st.success(msg)
-        else:
-            st.warning(msg)
+if not st.session_state.logged_in:
+    if choice == "Register":
+        st.subheader("Register")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        if st.button("Register"):
+            user_id, msg = register_user(username, password)
+            if user_id:
+                st.success(msg)
+            else:
+                st.warning(msg)
 
-elif choice == "Login" and not st.session_state.logged_in:
-    st.subheader("Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Login"):
-        user_id = get_user_id(username, password)
-        if user_id:
-            st.session_state.logged_in = True
-            st.session_state.user_id = user_id
-            st.session_state.username = username
-            st.rerun()
-        else:
-            st.warning("Incorrect username or password")
+    elif choice == "Login":
+        st.subheader("Login")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        if st.button("Login"):
+            user_id = get_user_id(username, password)
+            if user_id:
+                st.session_state.logged_in = True
+                st.session_state.user_id = user_id
+                st.session_state.username = username
+                st.rerun()
+            else:
+                st.warning("Incorrect username or password")
 
 if st.session_state.logged_in:
     st.success(f"Welcome, {st.session_state.username}!")
