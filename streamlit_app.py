@@ -18,7 +18,7 @@ with col1:
 with col2:
     st.markdown("""
         <div style='display: flex; justify-content: space-between; align-items: center;'>
-            <h1 style='margin: 0;'>AI Financial Automation App</h1>
+            <h1 style='margin: 0;'>Fintari</h1>
         </div>
     """, unsafe_allow_html=True)
 
