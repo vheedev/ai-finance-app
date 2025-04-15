@@ -12,25 +12,17 @@ st.set_page_config(
 )
 
 # --- Fintari Header with Logo and Mode Selector ---
-header_col1, header_col2, header_col3 = st.columns([1, 4, 2])
+header_col1, header_col2, header_col3 = st.columns([1, 5, 2])
 
-st.markdown(
-        "<div style='display: flex; align-items: center; height: 80px;'>"
-        "<img src='logo.png' width='50' style='margin-right: 10px;'/>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
+# --- Header Section: Logo | Fintari | Dropdown ---
+header_col1, header_col2, header_col3 = st.columns([1, 5, 2])
+with header_col1:
+    st.image("logo.png", width=60)
 
-with col2:
-    st.markdown(
-        "<div style='display: flex; align-items: center; height: 80px;'>"
-        "<h1 style='margin: 0;'>Fintari</h1>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
+with header_col2:
+    st.markdown("<h1 style='margin: 0; padding-top: 10px;'>Fintari</h1>", unsafe_allow_html=True)
 
-with col3:
-    st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)  # spacer for alignment
+with header_col3:
     mode = st.selectbox("", ["Login", "Register"], label_visibility="collapsed")
 
 # --- Session State Setup ---
