@@ -5,6 +5,9 @@ import os
 import hashlib
 import sqlite3
 
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
 def create_tables():
     conn = sqlite3.connect("finance_app.db")
     cursor = conn.cursor()
