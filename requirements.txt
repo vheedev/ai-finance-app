@@ -1,7 +1,6 @@
-fpdf
 streamlit
-matplotlib
-numpy
 pandas
+numpy
+matplotlib
+fpdf
 scikit-learn
-sqlite3; sys_platform != 'win32'
