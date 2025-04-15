@@ -52,9 +52,10 @@ def login_user(username, password):
 def register_user(username, password):
     conn = sqlite3.connect("finance_app.db")
     cursor = conn.cursor()
+    hashed = hash_password(password)
 
     try:
-        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed))
         conn.commit()
         return True, "Registration successful"
     except sqlite3.IntegrityError:
