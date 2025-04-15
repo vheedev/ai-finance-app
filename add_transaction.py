@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime
 
-# --- Simulated Financial Data ---
+# --- Simulated Financial Data (for banks, POS, ecommerce) ---
 
 def fetch_all_transactions():
     return [
@@ -35,5 +35,9 @@ def calculate_tax(transactions, tax_rate_percent=10):
     df["year"] = df["date"].dt.year
     current_month = datetime.today().month
     current_year = datetime.today().year
-    monthly_income = df[(df["type"] == "income") & (df["month"] == current_month) & (df["year"] == current_year)]["amount"].sum()
+    monthly_income = df[
+        (df["type"] == "income") & 
+        (df["month"] == current_month) & 
+        (df["year"] == current_year)
+    ]["amount"].sum()
     return monthly_income * (tax_rate_percent / 100)
