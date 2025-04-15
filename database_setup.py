@@ -40,10 +40,10 @@ def login_user(username, password):
 
     cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
     user = cursor.fetchone()
-
     conn.close()
+
     if user:
-        return True, ""
+        return True, "Login successful"
     return False, "Invalid username or password"
 
 def register_user(username, password):
@@ -53,7 +53,7 @@ def register_user(username, password):
     try:
         cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
-        return True, ""
+        return True, "Registration successful"
     except sqlite3.IntegrityError:
         return False, "Username already exists"
     finally:
