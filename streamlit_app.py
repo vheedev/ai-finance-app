@@ -10,11 +10,7 @@ st.set_page_config(page_title="AI Financial Automation App", page_icon="📈", l
 # --- Logo and Title ---
 st.image("logo.png", use_column_width=True)
 st.title("AI Financial Automation App")
-st.set_page_config(
-    page_title="AI Financial Automation App",
-    page_icon="logo.png",
-    layout="centered"
-)
+
 
 # --- Session State Setup ---
 if "logged_in" not in st.session_state:
