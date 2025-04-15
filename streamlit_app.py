@@ -8,9 +8,13 @@ from report_and_chart import save_prediction, plot_prediction
 st.set_page_config(page_title="AI Financial Automation App", page_icon="📈", layout="centered")
 
 # --- Logo and Title ---
-st.image("logo.png", use_column_width=True)
+st.image("logo.png", use_column_width=100)
 st.title("AI Financial Automation App")
-
+st.set_page_config(
+    page_title="AI Financial Automation App",
+    page_icon="logo.png",
+    layout="centered"
+)
 
 # --- Session State Setup ---
 if "logged_in" not in st.session_state:
