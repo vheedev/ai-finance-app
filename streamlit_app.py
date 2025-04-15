@@ -93,7 +93,8 @@ elif choice == "Login":
             st.session_state.logged_in = True
             st.session_state.user_id = user_id
             st.session_state.username = username
-            st.experimental_rerun()
+            st.rerun()
+
         else:
             st.warning("Incorrect username or password")
 
