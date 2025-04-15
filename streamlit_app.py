@@ -65,32 +65,39 @@ elif not st.session_state.logged_in and mode == "Register":
 if st.session_state.logged_in:
     st.success(f"Welcome back, {st.session_state.username}!")
 
-    transactions = fetch_all_transactions()
+    # Fetch user data
+    transactions = fetch_all_transactions(st.session_state.username)
+
+    # Show Summary
     show_summary(transactions)
 
+    # Tax Calculation
+    st.subheader("💡 Tax & Predictions")
     estimated_tax = calculate_tax(transactions)
     st.info(f"💡 Estimated tax this month: Rp {estimated_tax:,.0f}")
 
-    alerts = check_budget_limits(transactions)
-    for alert in alerts:
-        st.warning(alert)
-
+    # Next Month Prediction
     pred_income, pred_expense, pred_balance = predict_next_month(transactions)
     st.markdown("### 📈 Next Month Prediction")
     st.write(f"📥 Income: Rp {pred_income:,.0f}")
     st.write(f"📤 Expense: Rp {pred_expense:,.0f}")
     st.write(f"💰 Predicted Balance: Rp {pred_balance:,.0f}")
 
+    # Save & Plot
     save_prediction(pred_income, pred_expense, pred_balance)
     plot_prediction(pred_income, pred_expense, pred_balance)
 
-    st.download_button("⬇️ Download PDF Report", generate_pdf_report(
-        st.session_state.username,
-        pred_income, pred_expense, pred_balance, estimated_tax
-    ), file_name="monthly_report.pdf")
+    # Export Button
+    st.download_button(
+        "📄 Download PDF Report",
+        generate_pdf_report(st.session_state.username, pred_income, pred_expense, pred_balance, estimated_tax),
+        file_name="financial_report.pdf"
+    )
 
+    # Logout Button
     if st.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.user_id = None
         st.session_state.username = ""
-        st.experimental_rerun()
+        st.rerun()
+
