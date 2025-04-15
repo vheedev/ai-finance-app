@@ -4,7 +4,7 @@ from datetime import datetime
 from sklearn.linear_model import LinearRegression
 from export_pdf_report import generate_pdf_report
 from report_and_chart import save_prediction, plot_prediction
-from database_setup import login_user, register_user
+from finance_app import login_user, register_user
 from add_transaction import fetch_all_transactions, show_summary, calculate_tax, check_budget_limits, predict_next_month
 
 # --- Streamlit App ---
