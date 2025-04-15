@@ -138,4 +138,4 @@ if st.session_state.logged_in:
         st.session_state.logged_in = False
         st.session_state.user_id = None
         st.session_state.username = ""
-        st.experimental_rerun()
+        st.rerun()
