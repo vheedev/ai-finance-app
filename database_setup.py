@@ -40,8 +40,9 @@ def create_tables():
 def login_user(username, password):
     conn = sqlite3.connect("finance_app.db")
     cursor = conn.cursor()
+    hashed = hash_password(password)
 
-    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, hashed))
     user = cursor.fetchone()
     conn.close()
 
