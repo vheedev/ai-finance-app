@@ -10,17 +10,6 @@ def create_tables():
     cursor = conn.cursor()
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT NOT NULL,
-            amount REAL NOT NULL,
-            category TEXT,
-            type TEXT CHECK(type IN ('Income', 'Expense')) NOT NULL,
-            username TEXT NOT NULL
-        )
-    """)
-
-    cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
@@ -28,8 +17,21 @@ def create_tables():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT NOT NULL,
+            amount REAL NOT NULL,
+            description TEXT,
+            type TEXT CHECK(type IN ('Income', 'Expense')) NOT NULL,
+            account TEXT,
+            username TEXT NOT NULL
+        )
+    """)
+
     conn.commit()
     conn.close()
+
 
 # --- Auth Functions ---
 def login_user(username, password):
