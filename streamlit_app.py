@@ -6,7 +6,7 @@ from report_and_chart import save_prediction, plot_prediction
 
 # --- Streamlit Page Config ---
 st.set_page_config(
-    page_title="AI Financial Automation App",
+    page_title="Fintari",
     page_icon="logo.png",
     layout="centered"
 )
