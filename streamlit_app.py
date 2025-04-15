@@ -11,19 +11,18 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- Logo and Header with Dropdown ---
-col1, col2 = st.columns([1, 5])
-with col1:
-    st.image("logo.png", width=50)
-with col2:
-    st.markdown("""
-        <div style='display: flex; justify-content: space-between; align-items: center;'>
-            <h1 style='margin: 0;'>Fintari</h1>
-        </div>
-    """, unsafe_allow_html=True)
+# --- Fintari Header with Logo and Mode Selector ---
+header_col1, header_col2, header_col3 = st.columns([1, 4, 2])
 
-# --- Dropdown for mode selection ---
-mode = st.selectbox("Select Mode", ["Login", "Register"], index=0)
+with header_col1:
+    st.image("logo.png", width=40)
+
+with header_col2:
+    st.markdown("<h1 style='margin-top: 10px;'>Fintari</h1>", unsafe_allow_html=True)
+
+with header_col3:
+    mode = st.selectbox(" ", ["Login", "Register"], label_visibility="collapsed", index=0)
+
 
 # --- Session State Setup ---
 if "logged_in" not in st.session_state:
