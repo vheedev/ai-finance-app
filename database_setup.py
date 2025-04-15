@@ -4,33 +4,34 @@ import pandas as pd
 import os
 import hashlib
 
-DB_FILE = "users.csv"
+import sqlite3
 
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+def create_tables():
+    conn = sqlite3.connect("finance_app.db")
+    cursor = conn.cursor()
 
-def register_user(username, password):
-    if not os.path.exists(DB_FILE):
-        df = pd.DataFrame(columns=["username", "password"])
-    else:
-        df = pd.read_csv(DB_FILE)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT NOT NULL,
+            amount REAL NOT NULL,
+            category TEXT,
+            type TEXT CHECK(type IN ('Income', 'Expense')) NOT NULL,
+            username TEXT NOT NULL
+        )
+    """)
 
-    if username in df["username"].values:
-        return False, "Username already exists."
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    """)
 
-    hashed_pw = hash_password(password)
-    new_user = pd.DataFrame([{"username": username, "password": hashed_pw}])
-    df = pd.concat([df, new_user], ignore_index=True)
-    df.to_csv(DB_FILE, index=False)
-    return True, "Registration successful."
+    conn.commit()
+    conn.close()
 
-def login_user(username, password):
-    if not os.path.exists(DB_FILE):
-        return False, "No users registered yet."
+# Automatically create tables on import
+create_tables()
 
-    df = pd.read_csv(DB_FILE)
-    hashed_pw = hash_password(password)
-
-    if ((df["username"] == username) & (df["password"] == hashed_pw)).any():
-        return True, "Login successful."
-    return False, "Invalid username or password."
