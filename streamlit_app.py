@@ -83,7 +83,7 @@ if choice == "Register":
         else:
             st.warning(msg)
 
-elif choice == "Login":
+elif choice == "Login" and not st.session_state.logged_in:
     st.subheader("Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
@@ -94,7 +94,6 @@ elif choice == "Login":
             st.session_state.user_id = user_id
             st.session_state.username = username
             st.rerun()
-
         else:
             st.warning("Incorrect username or password")
 
