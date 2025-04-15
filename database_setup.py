@@ -3,7 +3,6 @@
 import pandas as pd
 import os
 import hashlib
-
 import sqlite3
 
 def create_tables():
@@ -32,6 +31,31 @@ def create_tables():
     conn.commit()
     conn.close()
 
-# Automatically create tables on import
-create_tables()
+# --- Auth Functions ---
+def login_user(username, password):
+    conn = sqlite3.connect("finance_app.db")
+    cursor = conn.cursor()
 
+    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+    user = cursor.fetchone()
+
+    conn.close()
+    if user:
+        return True, ""
+    return False, "Invalid username or password"
+
+def register_user(username, password):
+    conn = sqlite3.connect("finance_app.db")
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
+        return True, ""
+    except sqlite3.IntegrityError:
+        return False, "Username already exists"
+    finally:
+        conn.close()
+
+# Auto-create tables when file is loaded
+create_tables()
