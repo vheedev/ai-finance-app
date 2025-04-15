@@ -100,7 +100,19 @@ if not st.session_state.logged_in:
 
 if st.session_state.logged_in:
     st.success(f"Welcome, {st.session_state.username}!")
+    transactions = fetch_all_transactions()
+    show_summary(transactions)
+    estimated_tax = calculate_tax(transactions)
+    st.info(f"💡 Estimated tax this month: Rp {estimated_tax:,.0f}")
 
+    pred_income, pred_expense, pred_balance = predict_next_month(pd.DataFrame(transactions))
+    st.markdown("### 📅 Next Month Prediction")
+    st.write(f"📈 Income: Rp {pred_income:,.0f}")
+    st.write(f"📉 Expense: Rp {pred_expense:,.0f}")
+    st.write(f"🧮 Balance: Rp {pred_balance:,.0f}")
+
+    save_prediction(pred_income, pred_expense, pred_balance)
+    plot_prediction(pred_income, pred_expense, pred_balance)
     with st.expander("➕ Add New Transaction"):
         add_transaction(st.session_state.user_id)
 
@@ -132,7 +144,11 @@ if st.session_state.logged_in:
     save_prediction(pred_income, pred_expense, pred_balance)
     plot_prediction(pred_income, pred_expense, pred_balance)
 
-    st.download_button("📥 Download PDF Report", generate_pdf_report(st.session_state.username, pred_income, pred_expense, pred_balance, estimated_tax), file_name="financial_report.pdf")
+    if st.download_button("📄 Download PDF Report",
+        generate_pdf_report(st.session_state.username, pred_income, pred_expense, pred_balance, estimated_tax),
+        file_name="report.pdf"
+    ):
+        st.success("PDF downloaded!")
 
     if st.button("Logout"):
         st.session_state.logged_in = False
