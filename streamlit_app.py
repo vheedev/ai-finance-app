@@ -8,19 +8,18 @@ from report_and_chart import save_prediction, plot_prediction
 st.set_page_config(page_title="Fintari", page_icon="📈", layout="centered")
 
 # --- Logo, Title, and Dropdown (shown only if not logged in) ---
-header_col1, header_col2, header_col3 = st.columns([1, 3, 2])
+header_col1, header_col2, header_col3 = st.columns([1, 4, 2])
 with header_col1:
     st.image("logo.png", width=80)
 with header_col2:
-    st.markdown("<h1 style='margin: 0;'>Fintari</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='margin: 0; padding-top: 15px;'>'>Fintari</h1>", unsafe_allow_html=True)
 with header_col3:
-    if "logged_in" not in st.session_state or not st.session_state.logged_in:
-        st.selectbox("Login", ["Login", "Register"], key="mode")
-    else:
-        # Use st.button directly so it remains functional and aligned
+    if st.session_state.get("logged_in", False):
         if st.button("📄 Export Report to PDF"):
             generate_pdf_report(transactions, prediction)
             st.success("Report exported!")
+    else:
+        st.markdown("")  # to keep spacing clean
         
 
 
