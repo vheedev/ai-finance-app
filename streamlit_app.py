@@ -68,15 +68,18 @@ if st.session_state.logged_in:
     st.success(f"Welcome back, {st.session_state.username}!")
 
     transactions = fetch_all_transactions(st.session_state.username)
+    prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
 
+    # Create the prediction dictionary only once
+    prediction = {
+        "income": prediction_income,
+        "expense": prediction_expense,
+        "balance": prediction_balance
+    }
+    
     pdf_col1, pdf_col2 = st.columns([7, 3])
     with pdf_col2:
         if st.button("📄 Export Report to PDF"):
-            prediction = {
-                "income": prediction_income,
-                "expense": prediction_expense,
-                "balance": prediction_balance
-            }
             generate_pdf_report(transactions, prediction)
             st.success("Report exported!")
     
