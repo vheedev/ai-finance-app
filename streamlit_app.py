@@ -16,18 +16,10 @@ with header_col2:
 with header_col3:
     if st.session_state.get("logged_in", False):
         st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
-        if st.button("📄 Export Report to PDF"):
-            transactions = fetch_all_transactions(st.session_state.username)
-            prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
-            
-            prediction = {
-                "income": prediction_income,
-                "expense": prediction_expense,
-                "balance": prediction_balance
-            }
-            
-            generate_pdf_report(transactions, prediction)
-            st.success("Report exported!")
+    if st.button("Logout"):
+        st.session_state.logged_in = False
+        st.session_state.username = ""
+        st.rerun()
     else:
         st.markdown("</div>", unsafe_allow_html=True)  # to keep spacing clean
         
@@ -82,8 +74,8 @@ if st.session_state.logged_in:
     prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
     plot_prediction(prediction_income, prediction_expense, prediction_balance)
 
+    # --- Next Month Prediction ---
     st.markdown("### 📊 Next Month Prediction")
-    prediction = predict_next_month(transactions)
     st.write(f"🔻 Income: Rp {prediction['income']:,.0f}")
     st.write(f"🔺 Expense: Rp {prediction['expense']:,.0f}")
     st.write(f"💰 Predicted Balance: Rp {prediction['balance']:,.0f}")
@@ -98,7 +90,17 @@ if st.session_state.logged_in:
     st.markdown("### 🚦 Budget Alerts")
     check_budget_limits(transactions)
 
-    if st.button("Logout"):
-        st.session_state.logged_in = False
-        st.session_state.username = ""
-        st.rerun()
+    if st.button("📄 Export Report to PDF"):
+        transactions = fetch_all_transactions(st.session_state.username)
+        prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
+            
+        prediction = {
+            "income": prediction_income,
+            "expense": prediction_expense,
+            "balance": prediction_balance
+        }
+            
+        generate_pdf_report(transactions, prediction)
+        st.success("Report exported!")
+    
+    
