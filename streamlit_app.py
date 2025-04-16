@@ -19,7 +19,7 @@ with header_col3:
         if st.button("Logout"):
             st.session_state.logged_in = False
             st.session_state.username = ""
-            st.rerun()
+
     else:
         st.markdown("</div>", unsafe_allow_html=True)  # to keep spacing clean
         
@@ -112,5 +112,6 @@ with col2:
 
     st.markdown("### 🚦 Budget Alerts")
     check_budget_limits(transactions)
-    
+
+    st.rerun()
     
