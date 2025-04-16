@@ -8,6 +8,13 @@ from add_transaction import (
     calculate_tax,
     check_budget_limits,
 )
+# --- Integrations ---
+from integrations.bca import fetch_bca_transactions
+from integrations.mandiri import fetch_mandiri_transactions
+from integrations.shopee import fetch_shopee_transactions
+from integrations.gojek import fetch_gojek_transactions
+from integrations.moka import fetch_moka_transactions
+
 from fpdf import FPDF
 
 # --- Page config ---
@@ -85,6 +92,21 @@ else:
 
     # Fetch transactions and ensure dates
     txns = fetch_all_transactions(st.session_state.username)
+
+    # Fetch local db transactions
+    txns = fetch_all_transactions(st.session_state.username)
+
+    # Fetch external transactions
+    bca_txns     = fetch_bca_transactions(st.session_state.username)
+    mandiri_txns= fetch_mandiri_transactions(st.session_state.username)
+    shopee_txns = fetch_shopee_transactions(st.session_state.username)
+    gojek_txns  = fetch_gojek_transactions(st.session_state.username)
+    moka_txns   = fetch_moka_transactions(st.session_state.username)
+
+    # Combine all
+    ext_txns = pd.concat([bca_txns, mandiri_txns, shopee_txns, gojek_txns, moka_txns], ignore_index=True)
+    txns     = pd.concat([txns, ext_txns], ignore_index=True)
+
     txns['date'] = pd.to_datetime(txns['date'])
 
     # ——— Compute period bounds ———
@@ -107,7 +129,7 @@ else:
     else:
         sel_year, sel_month = map(int, sel_period.split("-"))
 
-    # Filter transactions for selected month
+    # Filter transactions for that period
     df_period = txns[
         (txns['date'].dt.year == sel_year) &
         (txns['date'].dt.month == sel_month)
