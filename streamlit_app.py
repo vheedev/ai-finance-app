@@ -17,7 +17,7 @@ with header_col3:
     if "logged_in" not in st.session_state or not st.session_state.logged_in:
         st.selectbox("Login", ["Login", "Register"], key="mode")
     else:
-        st.markdown(""<div style='display: flex; justify-content: flex-end; align-items: center; height: 100%;'>"
+        st.markdown("<div style='display: flex; justify-content: flex-end; align-items: center; height: 100%;'>"
             "<form action='#'><button style='padding: 0.5rem 1rem; font-size: 16px; border-radius: 8px; border: 1px solid #ccc;'>"
             "📄 Export Report to PDF</button></form></div>",
             unsafe_allow_html=True,")  # vertical space alignment
