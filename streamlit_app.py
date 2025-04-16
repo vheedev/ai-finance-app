@@ -12,7 +12,7 @@ header_col1, header_col2, header_col3 = st.columns([1, 4, 2])
 with header_col1:
     st.image("logo.png", width=80)
 with header_col2:
-    st.markdown("<h1 style='margin: 0; padding-top: 15px; center;'>Fintari</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='margin: 10; padding-top: 15px;'>Fintari</h1>", unsafe_allow_html=True)
 with header_col3:
     if st.session_state.get("logged_in", False):
         if st.button("📄 Export Report to PDF"):
