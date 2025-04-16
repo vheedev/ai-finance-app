@@ -29,7 +29,7 @@ with header_col3:
             generate_pdf_report(transactions, prediction)
             st.success("Report exported!")
     else:
-        st.markdown("</div>", , unsafe_allow_html=True)  # to keep spacing clean
+        st.markdown("</div>", unsafe_allow_html=True)  # to keep spacing clean
         
 
 
