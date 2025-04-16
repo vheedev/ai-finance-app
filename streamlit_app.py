@@ -17,6 +17,12 @@ with header_col3:
     if st.session_state.get("logged_in", False):
         st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
         if st.button("📄 Export Report to PDF"):
+            transactions = fetch_all_transactions(st.session_state.username)
+            prediction = {
+                "income": prediction_income,
+                "expense": prediction_expense,
+                "balance": prediction_balance
+            }
             generate_pdf_report(transactions, prediction)
             st.success("Report exported!")
     else:
