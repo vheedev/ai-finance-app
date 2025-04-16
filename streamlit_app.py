@@ -78,7 +78,9 @@ if st.session_state.logged_in:
     st.markdown("### 🚦 Budget Alerts")
     check_budget_limits(transactions)
 
+   # --- Prediction Chart ---
     st.markdown("### 📈 Prediction Chart")
+    prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
     plot_prediction(prediction_income, prediction_expense)
 
     st.markdown("### 🧾 Download PDF")
