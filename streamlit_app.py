@@ -19,13 +19,13 @@ with header_col3:
     else:
         st.markdown(
             "<div style='display: flex; justify-content: flex-end; align-items: center; height: 100%;'>"
-            "<form action='#'><button style='padding: 0.5rem 1rem; font-size: 16px; border-radius: 8px; border: 1px solid #ccc;'>"
-            "📄 Export Report to PDF</button></form></div>",
-            unsafe_allow_html=True,
-        )  # vertical space alignment
-        if st.button("📄 Export Report to PDF"):
+            "if st.button("📄 Export Report to PDF"):
             generate_pdf_report(transactions, prediction)
             st.success("Report exported!")
+            </div>",
+            unsafe_allow_html=True,
+        )  # vertical space alignment
+        
 
 
 # --- Session State Setup ---
