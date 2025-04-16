@@ -134,9 +134,15 @@ else:
         pdf.set_font("Arial", 'B', 12)
         pdf.cell(0, 8, "Summary Statistics", ln=1)
         pdf.set_font("Arial", '', 10)
-        for metric in ['count','mean','std','min','25%','50%','75%','max']:
-            row = summary.loc[metric]
-            pdf.cell(0, 6, f"{metric:>6}: " + ", ".join([f"{col}={val}" for col, val in row.items()]), ln=1)
+        # iterate whatever metrics are present in the summary
+        for idx, summary_row in summary.iterrows():
+            pdf.cell(
+                0, 6,
+                f"{idx}: " + ", ".join(
+                    [f"{col}={summary_row[col]}" for col in summary.columns]
+                ),
+                ln=1
+            )
         pdf.ln(5)
 
         # tax and alerts
