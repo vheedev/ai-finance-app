@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import streamlit as st
 from datetime import datetime
 import os
 
@@ -27,44 +28,28 @@ def save_prediction(income, expense, balance):
 
 # Visualize prediction with user choice
 def plot_prediction(income, expense, balance):
-    while True:
-        chart_type = input("View chart as [1] Bar Chart or [2] Line Chart: ").strip()
-        if chart_type not in ["1", "2"]:
-            print("Please type 1 or 2.")
-            continue
-        break
+    chart_type = st.radio("Select chart type:", ["Bar Chart", "Line Chart"], horizontal=True)
 
-    months = ["This Month", "Next Month"]
-    income_values = [income * 0.9, income]  # assuming current is 90% of predicted
-    expense_values = [expense * 0.95, expense]
-    balance_values = [balance * 0.85, balance]
+    months = ["Next Month"]
+    income_vals = [income]
+    expense_vals = [expense]
+    balance_vals = [balance]
 
-    plt.figure(figsize=(10, 6))
+    fig, ax = plt.subplots()
 
-    if chart_type == "1":
-        x = range(len(months))
-        plt.bar(x, income_values, width=0.2, label="Income")
-        plt.bar([i + 0.2 for i in x], expense_values, width=0.2, label="Expense")
-        plt.bar([i + 0.4 for i in x], balance_values, width=0.2, label="Balance")
-        plt.xticks([i + 0.2 for i in x], months)
-        plt.title("Cash Flow Prediction - Bar Chart")
+    if chart_type == "Bar Chart":
+        ax.bar(months, income_vals, label="Income", width=0.2)
+        ax.bar(months, expense_vals, label="Expense", width=0.2, bottom=income_vals)
+        ax.bar(months, balance_vals, label="Balance", width=0.2)
+    else:
+        ax.plot(months, income_vals, label="Income", marker="o")
+        ax.plot(months, expense_vals, label="Expense", marker="o")
+        ax.plot(months, balance_vals, label="Balance", marker="o")
 
-    elif chart_type == "2":
-        plt.plot(months, income_values, marker='o', label="Income")
-        plt.plot(months, expense_values, marker='o', label="Expense")
-        plt.plot(months, balance_values, marker='o', label="Balance")
-        plt.title("Cash Flow Prediction - Line Chart")
-
-    plt.ylabel("Amount (Rp)")
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-
-    os.makedirs("charts", exist_ok=True)
-    filename = f"charts/chart_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png"
-    plt.savefig(filename)
-    print(f"📊 Chart saved to {filename}")
-    plt.show()
+    ax.set_ylabel("Amount")
+    ax.set_title("📊 Next Month Financial Prediction")
+    ax.legend()
+    st.pyplot(fig)
 
 # Example use case
 if __name__ == "__main__":
