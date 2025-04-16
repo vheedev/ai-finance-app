@@ -54,7 +54,7 @@ if not st.session_state.logged_in:
             else:
                 st.error(msg)
 
-    else:
+    else:  # Register
         st.subheader("📝 Register")
         new_un = st.text_input("New Username", key="reg_user")
         new_pw = st.text_input("New Password", type="password", key="reg_pass")
@@ -87,9 +87,8 @@ else:
     txns = fetch_all_transactions(st.session_state.username)
     txns['date'] = pd.to_datetime(txns['date'])
 
-    # ——— Period selector + Download button row ———
+    # ——— Compute period bounds ———
     today = datetime.today().date()
-    # last 3 closed months
     last_months = []
     first_of_month = today.replace(day=1)
     for i in range(1, 4):
@@ -97,29 +96,32 @@ else:
         last_months.append(m.strftime("%Y-%m"))
     last_months = last_months[::-1]
 
-    # show selector and download side by side
-    sel_col, btn_col = st.columns([7, 3])
-    with sel_col:
-        tab1, tab2 = st.tabs(["Quick Select", "Calendar View"])
-        with tab1:
-            sel_period = st.selectbox("Pick one of the last 3 months", last_months)
-        with tab2:
-            sel_date = st.date_input("Or pick any date", value=today)
+    # Load previous or default selection
+    default_period = last_months[-1]
+    sel_period = st.session_state.get('sel_period', default_period)
+    sel_date = st.session_state.get('sel_date', today)
 
-        # determine year/month
-        if sel_date != today:
-            sel_year, sel_month = sel_date.year, sel_date.month
-        else:
-            sel_year, sel_month = map(int, sel_period.split("-"))
+    # Determine numeric year/month
+    if sel_date != today:
+        sel_year, sel_month = sel_date.year, sel_date.month
+    else:
+        sel_year, sel_month = map(int, sel_period.split("-"))
 
-        # filter for period
-        df_period = txns[
-            (txns['date'].dt.year == sel_year) &
-            (txns['date'].dt.month == sel_month)
-        ]
+    # Filter transactions for selected month
+    df_period = txns[
+        (txns['date'].dt.year == sel_year) &
+        (txns['date'].dt.month == sel_month)
+    ]
 
+    # Compute summary, tax, and alerts for df_period
+    summary = show_summary(df_period)
+    est_tax = calculate_tax(df_period)
+    alerts = check_budget_limits(df_period)
+
+    # ——— Download PDF button (top-right) ———
+    _, btn_col = st.columns([7, 3])
     with btn_col:
-        # build PDF in memory
+        # Build PDF in memory
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", 'B', 16)
@@ -128,26 +130,21 @@ else:
         pdf.cell(0, 8, f"User: {st.session_state.username}", ln=1)
         pdf.cell(0, 8, f"Period: {sel_year}-{sel_month:02d}", ln=1)
         pdf.ln(5)
-
-        # summary stats
-        summary = show_summary(df_period).round(2)
+        
+        # Summary stats for PDF
+        summ = summary.round(2)
         pdf.set_font("Arial", 'B', 12)
         pdf.cell(0, 8, "Summary Statistics", ln=1)
         pdf.set_font("Arial", '', 10)
-        # iterate whatever metrics are present in the summary
-        for idx, summary_row in summary.iterrows():
+        for idx, row in summ.iterrows():
             pdf.cell(
                 0, 6,
-                f"{idx}: " + ", ".join(
-                    [f"{col}={summary_row[col]}" for col in summary.columns]
-                ),
+                f"{idx}: " + ", ".join([f"{col}={row[col]}" for col in summ.columns]),
                 ln=1
             )
         pdf.ln(5)
 
-        # tax and alerts
-        est_tax = calculate_tax(df_period)
-        alerts = check_budget_limits(df_period)
+        # Tax & alerts for PDF
         pdf.set_font("Arial", 'B', 12)
         pdf.cell(0, 8, f"Estimated Tax (10%): Rp {est_tax:,.2f}", ln=1)
         pdf.ln(3)
@@ -168,7 +165,19 @@ else:
             key="download_pdf"
         )
 
-    # ——— Display report for period ———
+    # ——— Months & Calendar selection (below PDF) ———
+    tab1, tab2 = st.tabs(["Quick Select", "Calendar View"])
+    with tab1:
+        st.selectbox(
+            "Pick one of the last 3 months", last_months,
+            index=last_months.index(sel_period), key='sel_period'
+        )
+    with tab2:
+        st.date_input(
+            "Or pick any date", value=sel_date, key='sel_date'
+        )
+
+    # ——— Display report for that period ———
     st.markdown(f"## Report for {sel_year}-{sel_month:02d}")
 
     st.markdown("### 📊 Summary Report")
