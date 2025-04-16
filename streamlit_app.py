@@ -15,7 +15,16 @@ with col1:
 with col2:
     st.markdown("<h1 style='margin: 0;'>Fintari</h1>", unsafe_allow_html=True)
 with col3:
-    mode = st.selectbox("", ["Login", "Register"], label_visibility="collapsed")
+    mode = None
+    if not st.session_state.get("logged_in", False):
+        if mode == "Login":
+            # your login code
+        elif mode == "Register":
+            # your register code
+    else:
+        st.success(f"Welcome back, {st.session_state.username}!")
+        # your logged-in dashboard (tax, predictions, etc.)
+
 
 # --- Session State Setup ---
 if "logged_in" not in st.session_state:
