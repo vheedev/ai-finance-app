@@ -68,15 +68,16 @@ if st.session_state.logged_in:
     st.success(f"Welcome back, {st.session_state.username}!")
 
     transactions = fetch_all_transactions(st.session_state.username)
-    prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
 
-    # Create the prediction dictionary only once
+    # Run prediction ONCE and store in dict
+    prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
     prediction = {
         "income": prediction_income,
         "expense": prediction_expense,
         "balance": prediction_balance
     }
-    
+
+    # PDF Export Button Top Right
     pdf_col1, pdf_col2 = st.columns([7, 3])
     with pdf_col2:
         if st.button("📄 Export Report to PDF"):
@@ -85,7 +86,6 @@ if st.session_state.logged_in:
     
     # --- Prediction Chart ---
     st.markdown("### 📈 Prediction Chart")
-    prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
     plot_prediction(prediction_income, prediction_expense, prediction_balance)
     
     # --- Next Month Prediction ---
@@ -94,19 +94,16 @@ if st.session_state.logged_in:
     st.write(f"🔺 Expense: Rp {prediction['expense']:,.0f}")
     st.write(f"💰 Predicted Balance: Rp {prediction['balance']:,.0f}")
 
-    prediction = {
-    "income": prediction_income,
-    "expense": prediction_expense,
-    "balance": prediction_balance
-    }
-    
+    # --- Summary Report ---
     st.markdown("### 🧾 Summary Report")
     show_summary(transactions)
-    
+
+    # --- Estimated Tax ---
     st.markdown("### 💡 Estimated Tax")
     estimated_tax = calculate_tax(transactions)
     st.info(f"💡 Estimated tax this month: Rp {estimated_tax:,.1f}")
 
+    # --- Budget Alerts ---
     st.markdown("### 🚦 Budget Alerts")
     check_budget_limits(transactions)
     
