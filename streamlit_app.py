@@ -1,109 +1,109 @@
 import streamlit as st
-from database_setup import login_user, register_user
-from add_transaction import fetch_all_transactions, show_summary, calculate_tax, check_budget_limits, predict_next_month
-from export_pdf_report import generate_pdf_report
-from report_and_chart import save_prediction, plot_prediction
+from database_setup      import login_user, register_user
+from add_transaction     import (
+    fetch_all_transactions,
+    show_summary,
+    calculate_tax,
+    check_budget_limits,
+    predict_next_month,
+)
+from export_pdf_report   import generate_pdf_report
+from report_and_chart    import plot_prediction
 
-# --- Streamlit Page Config ---
+# --- Page config ---
 st.set_page_config(page_title="Fintari", page_icon="logo.png", layout="centered")
 
-# --- Logo, Title, and Dropdown (shown only if not logged in) ---
-header_col1, header_col2, header_col3 = st.columns([1, 4, 2])
-with header_col1:
-    st.image("logo.png", width=80)
-with header_col2:
-    st.markdown("<h1 style='text-align: center; margin: 10; padding-top: 15px;'>Fintari</h1>", unsafe_allow_html=True)
-with header_col3:
-    if st.session_state.get("logged_in", False):
-        st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
-        if st.button("Logout"):
-            st.session_state.logged_in = False
-            st.session_state.username = ""
-
-    else:
-        st.markdown("</div>", unsafe_allow_html=True)  # to keep spacing clean
-        
-
-
-# --- Session State Setup ---
+# --- Session state defaults ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
-    st.session_state.user_id = None
+if "username" not in st.session_state:
     st.session_state.username = ""
 
-# --- Handle Login / Register Logic ---
+# --- Header: logo / title / logout ---
+col1, col2, col3 = st.columns([1, 4, 2])
+with col1:
+    st.image("logo.png", width=80)
+with col2:
+    st.markdown(
+        "<h1 style='text-align: center; margin: 10; padding-top: 15px;'>Fintari</h1>",
+        unsafe_allow_html=True,
+    )
+with col3:
+    if st.session_state.logged_in:
+        if st.button("Logout", key="logout_btn"):
+            st.session_state.logged_in = False
+            st.session_state.username = ""
+            st.rerun()
+
+# --- Login / Register ---
 if not st.session_state.logged_in:
-    mode = st.session_state.get("mode", "Login")
-    
+    mode = st.selectbox("Select mode", ["Login", "Register"], key="mode_select")
+
     if mode == "Login":
         st.subheader("🔐 Login")
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        if st.button("Login"):
-            success, msg = login_user(username, password)
+        uname = st.text_input("Username", key="login_user")
+        pwd   = st.text_input("Password", type="password", key="login_pass")
+        if st.button("Login", key="login_btn"):
+            success, msg = login_user(uname, pwd)
             if success:
                 st.session_state.logged_in = True
-                st.session_state.username = username
-                st.success(f"Welcome back, {username}!")
+                st.session_state.username = uname
+                st.success(f"Welcome back, {uname}!")
                 st.rerun()
             else:
                 st.error(msg)
 
-    elif mode == "Register":
+    else:  # Register
         st.subheader("📝 Register")
-        new_username = st.text_input("New Username")
-        new_password = st.text_input("New Password", type="password")
-        if st.button("Register"):
-            success, msg = register_user(new_username, new_password)
+        new_un = st.text_input("New Username", key="reg_user")
+        new_pw = st.text_input("New Password", type="password", key="reg_pass")
+        if st.button("Register", key="reg_btn"):
+            success, msg = register_user(new_un, new_pw)
             if success:
-                st.success("Registration successful! Please login.")
-                st.session_state.mode = "Login"
+                st.success("Registration successful! Please log in.")
                 st.rerun()
             else:
                 st.error(msg)
-                
 
-# --- Main App Interface after login ---
-if st.session_state.logged_in:
-    st.success(f"Welcome back, {st.session_state.username}!")
+# --- Main app (after login) ---
+else:
+    st.success(f"Welcome, {st.session_state.username}!")
 
-    transactions = fetch_all_transactions(st.session_state.username)
+    # fetch data + predictions
+    txns = fetch_all_transactions(st.session_state.username)
+    inc, exp, bal = predict_next_month(txns)
 
-    # Run prediction ONCE and store in dict
-    prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
+    # build your dict exactly once
     prediction = {
-        "income": prediction_income,
-        "expense": prediction_expense,
-        "balance": prediction_balance
+        "income":  inc,
+        "expense": exp,
+        "balance": bal,
     }
 
-    # PDF Export Button Top Right
-    pdf_col1, pdf_col2 = st.columns([7, 3])
-    with pdf_col2:
-        if st.button("📄 Export Report to PDF"):
-            generate_pdf_report(transactions, prediction)
+    # --- PDF button top‑right of content ---
+    c1, c2 = st.columns([7, 3])
+    with c2:
+        if st.button("📄 Export Report to PDF", key="export_pdf"):
+            generate_pdf_report(txns, prediction)
             st.success("Report exported!")
-    
-    # --- Prediction Chart ---
+
+    # --- Chart ---
     st.markdown("### 📈 Prediction Chart")
-    plot_prediction(prediction_income, prediction_expense, prediction_balance)
-    
-    # --- Next Month Prediction ---
-    st.markdown("### 📊 Next Month Prediction")
+    plot_prediction(inc, exp, bal)
+
+    # --- Numbers ---
+    st.markdown("DEBUG: prediction dict is → 📊 Next Month Prediction")
     st.write(f"🔻 Income: Rp {prediction['income']:,.0f}")
     st.write(f"🔺 Expense: Rp {prediction['expense']:,.0f}")
     st.write(f"💰 Predicted Balance: Rp {prediction['balance']:,.0f}")
 
-    # --- Summary Report ---
+    # --- Rest of dashboard ---
     st.markdown("### 🧾 Summary Report")
-    show_summary(transactions)
+    show_summary(txns)
 
-    # --- Estimated Tax ---
     st.markdown("### 💡 Estimated Tax")
-    estimated_tax = calculate_tax(transactions)
-    st.info(f"💡 Estimated tax this month: Rp {estimated_tax:,.1f}")
+    est_tax = calculate_tax(txns)
+    st.info(f"💡 Estimated tax this month: Rp {est_tax:,.1f}")
 
-    # --- Budget Alerts ---
     st.markdown("### 🚦 Budget Alerts")
-    check_budget_limits(transactions)
-    
+    check_budget_limits(txns)
