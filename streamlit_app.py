@@ -1,6 +1,6 @@
 
 import streamlit as st
-from database_setup import login_user, register_user
+from database_setup import login_user, register_user, create_tables
 from add_transaction import fetch_all_transactions, show_summary, calculate_tax, check_budget_limits, predict_next_month
 
 # --- Streamlit Page Config ---
