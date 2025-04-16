@@ -5,7 +5,7 @@ from export_pdf_report import generate_pdf_report
 from report_and_chart import save_prediction, plot_prediction
 
 # --- Streamlit Page Config ---
-st.set_page_config(page_title="Fintari", page_icon="📈", layout="justified")
+st.set_page_config(page_title="Fintari", page_icon="📈", layout="center")
 
 # --- Logo, Title, and Dropdown (shown only if not logged in) ---
 header_col1, header_col2, header_col3 = st.columns([1, 3, 2])
