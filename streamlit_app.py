@@ -79,7 +79,7 @@ if st.session_state.logged_in:
     check_budget_limits(transactions)
 
     st.markdown("### 📈 Prediction Chart")
-    plot_prediction(prediction["income"], prediction["expense"])
+    plot_prediction(prediction_income, prediction_expense)
 
     st.markdown("### 🧾 Download PDF")
     if st.button("📄 Export Report to PDF"):
