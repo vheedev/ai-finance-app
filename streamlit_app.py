@@ -34,7 +34,7 @@ if not st.session_state.logged_in:
                 st.session_state.logged_in = True
                 st.session_state.username = username
                 st.success(f"Welcome back, {username}!")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error(msg)
 
@@ -69,4 +69,4 @@ else:
     if st.button("Logout"):
         st.session_state.logged_in = False
         st.session_state.username = ""
-        st.experimental_rerun()
+        st.rerun()
