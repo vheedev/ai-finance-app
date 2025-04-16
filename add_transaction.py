@@ -37,7 +37,12 @@ def predict_next_month(df):
 
     monthly = df.groupby(["year", "month"]).sum(numeric_only=True).reset_index()
     if len(monthly) < 2:
-        return 0, 0, 0
+    return {
+    "income": 0,
+    "expense": 0,
+    "balance": 0
+    }
+
 
     monthly["index"] = range(len(monthly))
     model_income = LinearRegression().fit(monthly[["index"]], monthly["income"])
@@ -47,7 +52,11 @@ def predict_next_month(df):
     pred_income = model_income.predict([[next_index]])[0]
     pred_expense = model_expense.predict([[next_index]])[0]
     pred_balance = pred_income - pred_expense
-    return pred_income, pred_expense, pred_balance
+    return {
+    "income": pred_income,
+    "expense": pred_expense,
+    "balance": pred_balance
+    }
 
 def show_summary(df):
     return df.describe()
