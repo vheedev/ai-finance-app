@@ -67,8 +67,6 @@ if not st.session_state.logged_in:
 if st.session_state.logged_in:
     st.success(f"Welcome back, {st.session_state.username}!")
 
-    transactions = fetch_all_transactions(st.session_state.username)
-
     # --- Top-right aligned Export PDF Button (Downloadable) ---
 col1, col2 = st.columns([6, 1])
 with col2:
@@ -91,6 +89,7 @@ with col2:
                 mime="application/pdf"
             )
 
+    transactions = fetch_all_transactions(st.session_state.username)
 
     # --- Prediction Chart ---
     st.markdown("### 📈 Prediction Chart")
