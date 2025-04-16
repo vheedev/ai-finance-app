@@ -5,7 +5,7 @@ from export_pdf_report import generate_pdf_report
 from report_and_chart import save_prediction, plot_prediction
 
 # --- Streamlit Page Config ---
-st.set_page_config(page_title="AI Financial Automation App", page_icon="📈", layout="centered")
+st.set_page_config(page_title="Fintari", page_icon="📈", layout="justify")
 
 # --- Logo, Title, and Dropdown (shown only if not logged in) ---
 header_col1, header_col2, header_col3 = st.columns([1, 3, 2])
@@ -55,6 +55,7 @@ if not st.session_state.logged_in:
                 st.rerun()
             else:
                 st.error(msg)
+                
 
 # --- Main App Interface after login ---
 if st.session_state.logged_in:
@@ -82,11 +83,6 @@ if st.session_state.logged_in:
 
     st.markdown("### 🚦 Budget Alerts")
     check_budget_limits(transactions)
-
-    st.markdown("### 🧾 Download PDF")
-    if st.button("📄 Export Report to PDF"):
-        generate_pdf_report(transactions, prediction)
-        st.success("Report exported!")
 
     if st.button("Logout"):
         st.session_state.logged_in = False
