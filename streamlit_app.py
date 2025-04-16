@@ -158,7 +158,7 @@ else:
 
         pdf_bytes = pdf.output(dest='S').encode('latin-1')
         st.download_button(
-            label="⬇️ Download Report as PDF",
+            label="⬇️ Download Report",
             data=pdf_bytes,
             file_name=f"report_{sel_year}-{sel_month:02d}.pdf",
             mime="application/pdf",
