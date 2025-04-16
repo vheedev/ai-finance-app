@@ -109,6 +109,4 @@ if st.session_state.logged_in:
 
     st.markdown("### 🚦 Budget Alerts")
     check_budget_limits(transactions)
-
-    st.rerun()
     
