@@ -18,15 +18,18 @@ with header_col3:
         st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
         if st.button("📄 Export Report to PDF"):
             transactions = fetch_all_transactions(st.session_state.username)
+            prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
+            
             prediction = {
                 "income": prediction_income,
                 "expense": prediction_expense,
                 "balance": prediction_balance
             }
+            
             generate_pdf_report(transactions, prediction)
             st.success("Report exported!")
     else:
-        st.markdown("")  # to keep spacing clean
+        st.markdown("</div>", , unsafe_allow_html=True)  # to keep spacing clean
         
 
 
