@@ -69,39 +69,38 @@ if not st.session_state.logged_in:
 else:
     st.success(f"Welcome, {st.session_state.username}!")
 
-    # fetch data + predictions
+    # fetch data + predictions (predict_next_month returns a dict)
     txns = fetch_all_transactions(st.session_state.username)
-    inc, exp, bal = predict_next_month(txns)
+    prediction = predict_next_month(txns)
 
-    # build your dict exactly once
-    prediction = {
-        "income":  inc,
-        "expense": exp,
-        "balance": bal,
-    }
-
-    # DEBUG: see exactly what prediction contains
-    st.write("DEBUG:", prediction)
-
-    # STOP the script right here—nothing below will run
-    st.stop()
+    # now pull the numeric values out
+    income  = prediction["income"]
+    expense = prediction["expense"]
+    balance = prediction["balance"]
 
     # --- PDF button top‑right of content ---
     c1, c2 = st.columns([7, 3])
     with c2:
         if st.button("📄 Export Report to PDF", key="export_pdf"):
-            generate_pdf_report(txns, prediction)
-            st.success("Report exported!")
+    tax = calculate_tax(txns)
+    generate_pdf_report(
+        st.session_state.username,
+        income,
+        expense,
+        balance,
+        tax
+    )
+    st.success("Report exported!")
 
     # --- Chart ---
     st.markdown("### 📈 Prediction Chart")
-    plot_prediction(inc, exp, bal)
+    plot_prediction(income, expense, balance)
 
     # --- Numbers ---
-    st.markdown("DEBUG: prediction dict is → 📊 Next Month Prediction")
-    st.write(f"🔻 Income: Rp {prediction['income']:,.0f}")
-    st.write(f"🔺 Expense: Rp {prediction['expense']:,.0f}")
-    st.write(f"💰 Predicted Balance: Rp {prediction['balance']:,.0f}")
+    st.markdown("### 📊 Next Month Prediction")
+    st.write(f"🔻 Income: Rp {income:,.0f}")
+    st.write(f"🔺 Expense: Rp {expense:,.0f}")
+    st.write(f"💰 Predicted Balance: Rp {balance:,.0f}")
 
     # --- Rest of dashboard ---
     st.markdown("### 🧾 Summary Report")
