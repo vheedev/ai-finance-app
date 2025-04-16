@@ -5,8 +5,13 @@ from sklearn.linear_model import LinearRegression
 
 def fetch_all_transactions(username):
     conn = sqlite3.connect("finance_app.db")
-    df = pd.read_sql_query("SELECT * FROM transactions WHERE username = ?", conn, params=(username,))
-    conn.close()
+    try:
+        df = pd.read_sql_query("SELECT * FROM transactions WHERE username = ?", conn, params=(username,))
+    except Exception as e:
+        print(f"[ERROR] Couldn't fetch transactions: {e}")
+        df = pd.DataFrame(columns=["date", "amount", "description", "type", "account", "username"])
+    finally:
+        conn.close()
     return df
 
 def calculate_tax(df):
