@@ -82,15 +82,15 @@ else:
     c1, c2 = st.columns([7, 3])
     with c2:
         if st.button("📄 Export Report to PDF", key="export_pdf"):
-    tax = calculate_tax(txns)
-    generate_pdf_report(
-        st.session_state.username,
-        income,
-        expense,
-        balance,
-        tax
-    )
-    st.success("Report exported!")
+            tax = calculate_tax(txns)
+            generate_pdf_report(
+                st.session_state.username,
+                income,
+                expense,
+                balance,
+                tax
+            )
+            st.success("Report exported!")
 
     # --- Chart ---
     st.markdown("### 📈 Prediction Chart")
