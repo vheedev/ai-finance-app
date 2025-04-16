@@ -81,7 +81,7 @@ if st.session_state.logged_in:
    # --- Prediction Chart ---
     st.markdown("### 📈 Prediction Chart")
     prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
-    plot_prediction(prediction_income, prediction_expense)
+    plot_prediction(prediction_income, prediction_expense, prediction_balance)
 
     st.markdown("### 🧾 Download PDF")
     if st.button("📄 Export Report to PDF"):
