@@ -69,11 +69,28 @@ if st.session_state.logged_in:
 
     transactions = fetch_all_transactions(st.session_state.username)
 
+    pdf_col1, pdf_col2 = st.columns([8, 2])
+    with pdf_col2:
+        if st.button("📄 Export Report to PDF"):
+            prediction = {
+                "income": prediction_income,
+                "expense": prediction_expense,
+                "balance": prediction_balance
+            }
+            generate_pdf_report(transactions, prediction)
+            st.success("Report exported!")
+    
     # --- Prediction Chart ---
     st.markdown("### 📈 Prediction Chart")
     prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
     plot_prediction(prediction_income, prediction_expense, prediction_balance)
 
+    prediction = {
+    "income": prediction_income,
+    "expense": prediction_expense,
+    "balance": prediction_balance
+    }
+    
     # --- Next Month Prediction ---
     st.markdown("### 📊 Next Month Prediction")
     st.write(f"🔻 Income: Rp {prediction['income']:,.0f}")
