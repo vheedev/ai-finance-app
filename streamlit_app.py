@@ -67,28 +67,6 @@ if not st.session_state.logged_in:
 if st.session_state.logged_in:
     st.success(f"Welcome back, {st.session_state.username}!")
 
-    # --- Top-right aligned Export PDF Button (Downloadable) ---
-col1, col2 = st.columns([6, 1])
-with col2:
-    transactions = fetch_all_transactions(st.session_state.username)
-    prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
-    prediction = {
-        "income": prediction_income,
-        "expense": prediction_expense,
-        "balance": prediction_balance
-    }
-
-    # Generate PDF only if button is clicked
-    if st.button("📄 Export Report to PDF"):
-        pdf_path = generate_pdf_report(transactions, prediction)
-        with open(pdf_path, "rb") as f:
-            st.download_button(
-                label="📥 Download Report",
-                data=f,
-                file_name="fintari_report.pdf",
-                mime="application/pdf"
-            )
-
     transactions = fetch_all_transactions(st.session_state.username)
 
     # --- Prediction Chart ---
