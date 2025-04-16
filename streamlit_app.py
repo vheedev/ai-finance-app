@@ -62,9 +62,10 @@ if st.session_state.logged_in:
 
     transactions = fetch_all_transactions(st.session_state.username)
 
-    st.markdown("### 💡 Estimated Tax")
-    estimated_tax = calculate_tax(transactions)
-    st.info(f"💡 Estimated tax this month: Rp {estimated_tax:,.1f}")
+    # --- Prediction Chart ---
+    st.markdown("### 📈 Prediction Chart")
+    prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
+    plot_prediction(prediction_income, prediction_expense, prediction_balance)
 
     st.markdown("### 📊 Next Month Prediction")
     prediction = predict_next_month(transactions)
@@ -74,14 +75,13 @@ if st.session_state.logged_in:
 
     st.markdown("### 🧾 Summary Report")
     show_summary(transactions)
+    
+    st.markdown("### 💡 Estimated Tax")
+    estimated_tax = calculate_tax(transactions)
+    st.info(f"💡 Estimated tax this month: Rp {estimated_tax:,.1f}")
 
     st.markdown("### 🚦 Budget Alerts")
     check_budget_limits(transactions)
-
-   # --- Prediction Chart ---
-    st.markdown("### 📈 Prediction Chart")
-    prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
-    plot_prediction(prediction_income, prediction_expense, prediction_balance)
 
     st.markdown("### 🧾 Download PDF")
     if st.button("📄 Export Report to PDF"):
