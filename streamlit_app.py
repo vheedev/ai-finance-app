@@ -14,10 +14,15 @@ with header_col1:
 with header_col2:
     st.markdown("<h1 style='margin: 0;'>Fintari</h1>", unsafe_allow_html=True)
 with header_col3:
+    with header_col3:
     if "logged_in" not in st.session_state or not st.session_state.logged_in:
         st.selectbox("Login", ["Login", "Register"], key="mode")
     else:
-        st.markdown("")  # empty cell to preserve spacing
+        st.markdown("###")  # vertical space alignment
+        if st.button("📄 Export Report to PDF"):
+            generate_pdf_report(transactions, prediction)
+            st.success("Report exported!")
+
 
 # --- Session State Setup ---
 if "logged_in" not in st.session_state:
