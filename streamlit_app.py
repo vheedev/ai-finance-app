@@ -1,20 +1,14 @@
-from database_setup
-from add_transaction
-from export_pdf_report
-from report_and_chart
-from datetime import datetime, date
 import streamlit as st
 import pandas as pd
-import login_user, register_user
-import (
+from datetime import datetime, date
+from database_setup import login_user, register_user
+from add_transaction import (
     fetch_all_transactions,
     show_summary,
     calculate_tax,
     check_budget_limits,
-    predict_next_month,
 )
-import generate_pdf_report
-import plot_prediction
+from fpdf import FPDF
 
 # --- Page config ---
 st.set_page_config(page_title="Fintari", page_icon="logo.png", layout="centered")
@@ -48,7 +42,7 @@ if not st.session_state.logged_in:
     if mode == "Login":
         st.subheader("🔐 Login")
         uname = st.text_input("Username", key="login_user")
-        pwd   = st.text_input("Password", type="password", key="login_pass")
+        pwd = st.text_input("Password", type="password", key="login_pass")
         if st.button("Login", key="login_btn"):
             success, msg = login_user(uname, pwd)
             if success:
@@ -75,79 +69,92 @@ if not st.session_state.logged_in:
 else:
     st.success(f"Welcome, {st.session_state.username}!")
 
-    # fetch data + predictions (predict_next_month returns a dict)
+    # Fetch all transactions and ensure dates are datetime
     txns = fetch_all_transactions(st.session_state.username)
-
-    # make sure dates are datetimes
     txns['date'] = pd.to_datetime(txns['date'])
-    # —— period selector ——
-    today = datetime.today().date()
 
-    # build list of the last 3 closed months
+    # ——— Period selector ———
+    today = datetime.today().date()
+    # last 3 closed months list
     last_months = []
-    first_of_this_month = today.replace(day=1)
+    first_of_month = today.replace(day=1)
     for i in range(1, 4):
-        m = first_of_this_month - pd.DateOffset(months=i)
+        m = first_of_month - pd.DateOffset(months=i)
         last_months.append(m.strftime("%Y-%m"))
     last_months = last_months[::-1]
 
-    # two‐tab chooser: quick vs. calendar
     tab1, tab2 = st.tabs(["Quick Select", "Calendar View"])
     with tab1:
         sel_period = st.selectbox("Pick one of the last 3 months", last_months)
     with tab2:
-        sel_date   = st.date_input("Or pick any date", value=today)
+        sel_date = st.date_input("Or pick any date", value=today)
 
-    # decide which to use
     if sel_date != today:
         sel_year, sel_month = sel_date.year, sel_date.month
     else:
         sel_year, sel_month = map(int, sel_period.split("-"))
 
-    # filter to only that month
-    df_period = txns[
-        (txns['date'].dt.year  == sel_year) &
-        (txns['date'].dt.month == sel_month)
-    ]
-    
-    prediction = predict_next_month(txns)
+    # Filter transactions for the selected month
+    df_period = txns[(txns['date'].dt.year == sel_year) & (txns['date'].dt.month == sel_month)]
 
-    # now pull the numeric values out
-    income  = prediction["income"]
-    expense = prediction["expense"]
-    balance = prediction["balance"]
+    # ——— Display report for that period ———
+    st.markdown(f"## Report for {sel_year}-{sel_month:02d}")
 
-    # --- PDF button top‑right of content ---
-    c1, c2 = st.columns([7, 3])
-    with c2:
-        if st.button("📄 Export Report to PDF", key="export_pdf"):
-            tax = calculate_tax(txns)
-            generate_pdf_report(
-                st.session_state.username,
-                income,
-                expense,
-                balance,
-                tax
-            )
-            st.success("Report exported!")
+    # Summary statistics
+    st.markdown("### 📊 Summary Report")
+    st.dataframe(show_summary(df_period))
 
-    # --- Chart ---
-    st.markdown("### 📈 Prediction Chart")
-    plot_prediction(income, expense, balance)
-
-    # --- Numbers ---
-    st.markdown("### 📊 Next Month Prediction")
-    st.write(f"🔻 Income: Rp {income:,.0f}")
-    st.write(f"🔺 Expense: Rp {expense:,.0f}")
-    st.write(f"💰 Predicted Balance: Rp {balance:,.0f}")
-
-    # --- Rest of dashboard ---
-    st.markdown("### 🧾 Summary Report")
-    show_summary(txns)
-
+    # Estimated tax
     st.markdown("### 💡 Estimated Tax")
-    est_tax = calculate_tax(txns)
+    est_tax = calculate_tax(df_period)
     st.info(f"💡 Estimated tax this month: Rp {est_tax:,.1f}")
 
+    # Budget alerts
     st.markdown("### 🚦 Budget Alerts")
-    check_budget_limits(txns)
+    alerts = check_budget_limits(df_period)
+    if not alerts:
+        st.write("No alerts!")
+    else:
+        for cat, amt in alerts:
+            st.write(f"- {cat}: Rp {amt:,.0f}")
+
+    # ——— Downloadable PDF ———
+    if st.button("📄 Download Report PDF", key="download_pdf"):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", 'B', 16)
+        pdf.cell(0, 10, "Financial Report", ln=1, align='C')
+        pdf.set_font("Arial", '', 12)
+        pdf.cell(0, 8, f"User: {st.session_state.username}", ln=1)
+        pdf.cell(0, 8, f"Period: {sel_year}-{sel_month:02d}", ln=1)
+        pdf.ln(5)
+
+        # Write summary statistics rows
+        summary = show_summary(df_period).round(2)
+        pdf.set_font("Arial", 'B', 12)
+        pdf.cell(0, 8, "Summary Statistics", ln=1)
+        pdf.set_font("Arial", '', 10)
+        for metric in ['count','mean','std','min','25%','50%','75%','max']:
+            row = summary.loc[metric]
+            pdf.cell(0, 6, f"{metric:>6}: " + ", ".join([f"{col}={val}" for col, val in row.items()]), ln=1)
+        pdf.ln(5)
+
+        # Tax and alerts
+        pdf.set_font("Arial", 'B', 12)
+        pdf.cell(0, 8, f"Estimated Tax (10%): Rp {est_tax:,.2f}", ln=1)
+        pdf.ln(3)
+        pdf.cell(0, 8, "Budget Alerts:", ln=1)
+        pdf.set_font("Arial", '', 10)
+        if not alerts:
+            pdf.cell(0, 6, "None", ln=1)
+        else:
+            for cat, amt in alerts:
+                pdf.cell(0, 6, f"- {cat}: Rp {amt:,.0f}", ln=1)
+
+        pdf_bytes = pdf.output(dest='S').encode('latin-1')
+        st.download_button(
+            label="⬇️ Download PDF",
+            data=pdf_bytes,
+            file_name=f"report_{sel_year}-{sel_month:02d}.pdf",
+            mime="application/pdf"
+        )
