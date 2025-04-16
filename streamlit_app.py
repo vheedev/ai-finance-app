@@ -69,7 +69,7 @@ if st.session_state.logged_in:
 
     transactions = fetch_all_transactions(st.session_state.username)
 
-    pdf_col1, pdf_col2 = st.columns([8, 2])
+    pdf_col1, pdf_col2 = st.columns([7, 3])
     with pdf_col2:
         if st.button("📄 Export Report to PDF"):
             prediction = {
