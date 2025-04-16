@@ -84,12 +84,6 @@ if st.session_state.logged_in:
     st.markdown("### 📈 Prediction Chart")
     prediction_income, prediction_expense, prediction_balance = predict_next_month(transactions)
     plot_prediction(prediction_income, prediction_expense, prediction_balance)
-
-    prediction = {
-    "income": prediction_income,
-    "expense": prediction_expense,
-    "balance": prediction_balance
-    }
     
     # --- Next Month Prediction ---
     st.markdown("### 📊 Next Month Prediction")
@@ -97,6 +91,12 @@ if st.session_state.logged_in:
     st.write(f"🔺 Expense: Rp {prediction['expense']:,.0f}")
     st.write(f"💰 Predicted Balance: Rp {prediction['balance']:,.0f}")
 
+    prediction = {
+    "income": prediction_income,
+    "expense": prediction_expense,
+    "balance": prediction_balance
+    }
+    
     st.markdown("### 🧾 Summary Report")
     show_summary(transactions)
     
