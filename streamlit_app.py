@@ -15,7 +15,7 @@ with header_col2:
     st.markdown("<h1 style='text-align: center; margin: 10; padding-top: 15px;'>Fintari</h1>", unsafe_allow_html=True)
 with header_col3:
     if st.session_state.get("logged_in", False):
-        st.markdown("<div style='padding-top: 10px;'>", unsafe_allow_html=True)
+        st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
         if st.button("📄 Export Report to PDF"):
             generate_pdf_report(transactions, prediction)
             st.success("Report exported!")
