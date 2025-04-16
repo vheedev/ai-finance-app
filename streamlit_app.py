@@ -80,6 +80,12 @@ else:
         "balance": bal,
     }
 
+    # DEBUG: see exactly what prediction contains
+    st.write("DEBUG:", prediction)
+
+    # STOP the script right here—nothing below will run
+    st.stop()
+
     # --- PDF button top‑right of content ---
     c1, c2 = st.columns([7, 3])
     with c2:
