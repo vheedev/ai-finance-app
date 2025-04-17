@@ -1,12 +1,5 @@
 import streamlit as st
-import pandas as pd
-
-# — persist login via URL query‑params — 
-params = st.query_params
-if params.get("logged_in") == ["true"] and "username" in params:
-    st.session_state.logged_in  = True
-    st.session_state.username   = params["username"][0]
-    
+import pandas as pd 
 from datetime import datetime, date, timedelta
 from database_setup import login_user, register_user
 from add_transaction import (
@@ -36,9 +29,6 @@ if params.get("logged_in") == ["true"] and "username" in params:
     # restore session state from URL parameters
     st.session_state.logged_in = True
     st.session_state.username = params["username"][0]
-
-# --- Session state defaults ---
-st.set_page_config(page_title="Fintari", page_icon="logo.png", layout="centered")
 
 # --- Session state defaults ---
 if "logged_in" not in st.session_state:
@@ -76,6 +66,15 @@ if not st.session_state.logged_in:
         uname = st.text_input("Username", key="login_user")
         pwd = st.text_input("Password", type="password", key="login_pass")
         if st.button("Login", key="login_btn"):
+            success, msg = login_user(uname, pwd)
+            if success:
+                st.session_state.last_active = datetime.now()
+                st.session_state.logged_in = True
+                st.session_state.username = uname
+                st.success(f"Welcome back, {uname}!")
+                st.rerun()
+            else:
+                st.error(msg)
             success, msg = login_user(uname, pwd)
             if success:
                 st.session_state.last_active = datetime.now()
