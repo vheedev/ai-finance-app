@@ -58,7 +58,7 @@ with col2:
 with col3:
     if st.session_state.logged_in:
         # add top padding for logout button
-        st.markdown("<div style='padding-top: 20px;'>", unsafe_allow_html=True)
+        st.markdown("<div style='padding-top: 25px;'>", unsafe_allow_html=True)
         if st.button("Logout", key="logout_btn"):
             # clear URL params on logout
             st.set_query_params()
@@ -67,7 +67,7 @@ with col3:
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-# --- Login / Register / Register ---
+# --- Login / Register ---
 if not st.session_state.logged_in:
     mode = st.selectbox("Select mode", ["Login", "Register"], key="mode_select")
 
@@ -79,17 +79,6 @@ if not st.session_state.logged_in:
             success, msg = login_user(uname, pwd)
             if success:
                 st.experimental_set_query_params(logged_in="true", username=uname)
-                st.session_state.last_active = datetime.now()
-                st.session_state.logged_in = True
-                st.session_state.username = uname
-                st.success(f"Welcome back, {uname}!")
-                st.rerun()
-        else:
-            st.error(msg)
-    else:
-                st.error(msg)
-            success, msg = login_user(uname, pwd)
-            if success:
                 st.session_state.last_active = datetime.now()
                 st.session_state.logged_in = True
                 st.session_state.username = uname
