@@ -64,7 +64,7 @@ if not st.session_state.logged_in:
         uname = st.text_input("Username", key="login_user")
         pwd = st.text_input("Password", type="password", key="login_pass")
         if st.button("Login", key="login_btn"):
-    success, msg = login_user(uname, pwd)
+            success, msg = login_user(uname, pwd)
     if success:
         # persist login in the URL (only once)
         st.experimental_set_query_params(logged_in="true", username=uname)
