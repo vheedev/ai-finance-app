@@ -160,16 +160,20 @@ else:
     sel_date   = st.session_state.get('sel_date', today)
 
     # Determine year/month
-    if sel_date != today:
-        sel_year, sel_month = sel_date.year, sel_date.month
-    else:
-        sel_year, sel_month = map(int, sel_period.split("-"))
+    if isinstance(sel_range, tuple) and len(sel_range) == 2:
+    start_date, end_date = sel_range
+else:
+    # fallback to single month mode
+    sel_year, sel_month = map(int, sel_period.split("-"))
+    start_date = date(sel_year, sel_month, 1)
+    next_month = start_date + pd.DateOffset(months=1)
+    end_date = next_month - pd.Timedelta(days=1)
 
-    # Filter transactions for the period
-    df_period = txns[
-        (txns['date'].dt.year  == sel_year) &
-        (txns['date'].dt.month == sel_month)
-    ]
+# Filter by full date range
+df_period = txns[
+    (txns["date"].dt.date >= start_date) &
+    (txns["date"].dt.date <= end_date)
+]
 
     # Compute metrics
     summary = show_summary(df_period)
@@ -228,9 +232,12 @@ else:
             index=last_months.index(sel_period), key='sel_period'
         )
     with tab2:
-        st.date_input(
-            "Or pick any date", value=sel_date, key='sel_date'
-        )
+    sel_range = st.date_input(
+        "Or pick a custom date range",
+        value=(today - timedelta(days=30), today),
+        key="sel_range"
+    )
+
 
     # ——— Display report ———
     st.markdown(f"## Report for {sel_year}-{sel_month:02d}")
