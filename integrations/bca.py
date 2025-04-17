@@ -13,4 +13,4 @@ def fetch_bca_transactions(username: str) -> pd.DataFrame:
         #   "type":"Income", "account":"BCA", "username": username },
     ]
     # TODO: replace with real BCA API calls
-    return pd.DataFrame(data)
+    return pd.DataFrame([])
