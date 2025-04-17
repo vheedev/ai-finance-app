@@ -23,6 +23,17 @@ from fpdf import FPDF
 # --- Page config ---
 st.set_page_config(page_title="Fintari", page_icon="logo.png", layout="centered")
 
+# -- Hide Streamlit deprecation banners (CSS hack) --
+hide_deprecation = """
+<style>
+  /* hide warning alert banners */
+  div[data-testid="stAlert"] > div[role="alert"] {
+    display: none !important;
+  }
+</style>
+"""
+st.markdown(hide_deprecation, unsafe_allow_html=True)
+
 # --- Persist login via Query Params ---
 params = st.experimental_get_query_params()
 if params.get("logged_in") == ["true"] and "username" in params:
