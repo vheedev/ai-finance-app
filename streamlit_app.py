@@ -232,11 +232,11 @@ else:
             index=last_months.index(sel_period), key='sel_period'
         )
     with tab2:
-    sel_range = st.date_input(
-        "Or pick a custom date range",
-        value=(today - timedelta(days=30), today),
-        key="sel_range"
-    )
+        sel_range = st.date_input(
+            "Or pick a custom date range",
+            value=(today - timedelta(days=30), today),
+            key="sel_range"
+        )
 
 
     # ——— Display report ———
