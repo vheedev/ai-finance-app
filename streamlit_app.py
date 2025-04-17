@@ -35,7 +35,7 @@ hide_deprecation = """
 st.markdown(hide_deprecation, unsafe_allow_html=True)
 
 # --- Persist login via Query Params ---
-params = st.query_params
+params = st.experimental_get_query_params
 if params.get("logged_in") == ["true"] and "username" in params:
     st.session_state.logged_in = True
     st.session_state.username   = params["username"][0]
@@ -61,7 +61,7 @@ with col3:
         st.markdown("<div style='padding-top: 25px;'>", unsafe_allow_html=True)
         if st.button("Logout", key="logout_btn"):
             # clear URL params on logout
-            st.set_query_params()
+            st.experimental_set_query_params()
             st.session_state.logged_in = False
             st.session_state.username = ""
             st.rerun()
