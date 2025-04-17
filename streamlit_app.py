@@ -23,6 +23,23 @@ from fpdf import FPDF
 # --- Page config ---
 st.set_page_config(page_title="Fintari", page_icon="logo.png", layout="centered")
 
+# -- Hide Streamlit deprecation banners (CSS hack) --
+hide_deprecation = """
+<style>
+  /* hide warning alert banners */
+  div[data-testid="stAlert"] > div[role="alert"] {
+    display: none !important;
+  }
+</style>
+"""
+st.markdown(hide_deprecation, unsafe_allow_html=True)
+
+# --- Persist login via Query Params ---
+params = st.query_params
+if params.get("logged_in") == ["true"] and "username" in params:
+    st.session_state.logged_in = True
+    st.session_state.username   = params["username"][0]
+
 # --- Session state defaults ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -43,12 +60,14 @@ with col3:
         # add top padding for logout button
         st.markdown("<div style='padding-top: 20px;'>", unsafe_allow_html=True)
         if st.button("Logout", key="logout_btn"):
+            # clear URL params on logout
+            st.set_query_params()
             st.session_state.logged_in = False
             st.session_state.username = ""
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-# --- Login / Register ---
+# --- Login / Register / Register ---
 if not st.session_state.logged_in:
     mode = st.selectbox("Select mode", ["Login", "Register"], key="mode_select")
 
@@ -57,6 +76,18 @@ if not st.session_state.logged_in:
         uname = st.text_input("Username", key="login_user")
         pwd = st.text_input("Password", type="password", key="login_pass")
         if st.button("Login", key="login_btn"):
+            success, msg = login_user(uname, pwd)
+            if success:
+                st.experimental_set_query_params(logged_in="true", username=uname)
+                st.session_state.last_active = datetime.now()
+                st.session_state.logged_in = True
+                st.session_state.username = uname
+                st.success(f"Welcome back, {uname}!")
+                st.rerun()
+        else:
+            st.error(msg)
+    else:
+                st.error(msg)
             success, msg = login_user(uname, pwd)
             if success:
                 st.session_state.last_active = datetime.now()
@@ -161,7 +192,7 @@ else:
         pdf.cell(0, 10, "Financial Report", ln=1, align='C')
         pdf.set_font("Arial", '', 12)
         pdf.cell(0, 8, f"User: {st.session_state.username}", ln=1)
-        pdf.cell(0, 8, f"Period: {sel_year}-{sel_month:02d}", ln=1)
+        pdf.cell(0, 8, f"Period: {start_date} to {end_date}", ln=1)
         pdf.ln(5)
 
         summ = summary.round(2)
