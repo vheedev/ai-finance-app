@@ -24,11 +24,10 @@ from fpdf import FPDF
 st.set_page_config(page_title="Fintari", page_icon="logo.png", layout="centered")
 
 # --- Persist login via Query Params ---
-params = st.query_params
+params = st.experimental_get_query_params()
 if params.get("logged_in") == ["true"] and "username" in params:
-    # restore session state from URL parameters
-    st.session_state.logged_in = True
-    st.session_state.username = params["username"][0]
+    st.session_state.logged_in  = True
+    st.session_state.username   = params["username"][0]
 
 # --- Session state defaults ---
 if "logged_in" not in st.session_state:
@@ -47,13 +46,12 @@ with col2:
     )
 with col3:
     if st.session_state.logged_in:
-        # add top padding for logout button
-        st.markdown("<div style='padding-top: 25px;'>", unsafe_allow_html=True)
         if st.button("Logout", key="logout_btn"):
-            # clear URL params on logout
-            st.set_query_params()
+            # clear the URL params so refresh truly logs out
+            st.experimental_set_query_params()
+
             st.session_state.logged_in = False
-            st.session_state.username = ""
+            st.session_state.username  = ""
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -66,15 +64,18 @@ if not st.session_state.logged_in:
         uname = st.text_input("Username", key="login_user")
         pwd = st.text_input("Password", type="password", key="login_pass")
         if st.button("Login", key="login_btn"):
-            success, msg = login_user(uname, pwd)
-            if success:
-                st.session_state.last_active = datetime.now()
-                st.session_state.logged_in = True
-                st.session_state.username = uname
-                st.success(f"Welcome back, {uname}!")
-                st.rerun()
-            else:
-                st.error(msg)
+    success, msg = login_user(uname, pwd)
+    if success:
+        # persist login in the URL (only once)
+        st.experimental_set_query_params(logged_in="true", username=uname)
+
+        st.session_state.last_active = datetime.now()
+        st.session_state.logged_in     = True
+        st.session_state.username      = uname
+        st.success(f"Welcome back, {uname}!")
+        st.rerun()
+    else:
+        st.error(msg)
             success, msg = login_user(uname, pwd)
             if success:
                 st.session_state.last_active = datetime.now()
