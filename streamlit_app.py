@@ -24,7 +24,7 @@ from fpdf import FPDF
 st.set_page_config(page_title="Fintari", page_icon="logo.png", layout="centered")
 
 # --- Persist login via Query Params ---
-params = st.experimental_get_query_params()
+params = st.query_params()
 if params.get("logged_in") == ["true"] and "username" in params:
     # restore session state from URL parameters
     st.session_state.logged_in = True
