@@ -160,7 +160,7 @@ else:
     alerts  = check_budget_limits(df_period)
 
     # ——— Download PDF button (top-right) ———
-    _, btn_col = st.columns([7, 3])
+    _, btn_col = st.columns([8, 2])
     with btn_col:
         pdf = FPDF()
         pdf.add_page()
