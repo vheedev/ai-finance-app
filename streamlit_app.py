@@ -62,8 +62,7 @@ with col3:
         # add top padding for logout button
         st.markdown("<div style='padding-top: 25px;'>", unsafe_allow_html=True)
         if st.button("Logout", key="logout_btn"):
-            # inside your Logout handler
-            st.set_query_params()  # clears the query params
+
 
             st.session_state.logged_in = False
             st.session_state.username = ""
