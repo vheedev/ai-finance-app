@@ -63,7 +63,7 @@ with col3:
         st.markdown("<div style='padding-top: 25px;'>", unsafe_allow_html=True)
         if st.button("Logout", key="logout_btn"):
             # inside your Logout handler
-            st.query_params  # clears the query params
+            st.set_query_params()  # clears the query params
 
             st.session_state.logged_in = False
             st.session_state.username = ""
