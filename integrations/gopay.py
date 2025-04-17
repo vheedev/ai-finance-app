@@ -1,15 +1,16 @@
-# File: integrations/bca.py
+# File: integrations/gopay.py
 import pandas as pd
 
-def fetch_bca_transactions(username: str) -> pd.DataFrame:
+def fetch_gopay_transactions(username: str) -> pd.DataFrame:
     """
-    Fetch Bank BCA transactions for `username` via BCA API.
+    Stub for Gopay integration.
     Return a DataFrame with columns:
-    [ "date", "amount", "description", "type", "account", "username" ].
+      ["date","amount","description","type","account","username"]
     """
-    # TODO: authenticate to BCA Open API, pull JSON, map into rows:
+    # TODO: authenticate to gopay Open API, pull JSON, map into rows:
     data = [
         # { "date": "...", "description": "...", "amount": 1000000,
-        #   "type":"Income", "account":"BCA", "username": username },
+        #   "type":"Income", "account":"gopay", "username": username },
     ]
-    return pd.DataFrame(data)
+    # TODO: replace with real gopay API calls
+    return pd.DataFrame([])
