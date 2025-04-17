@@ -40,10 +40,13 @@ with col2:
     )
 with col3:
     if st.session_state.logged_in:
+        # add top padding for logout button
+        st.markdown("<div style='padding-top: 15px;'>", unsafe_allow_html=True)
         if st.button("Logout", key="logout_btn"):
             st.session_state.logged_in = False
             st.session_state.username = ""
             st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # --- Login / Register ---
 if not st.session_state.logged_in:
