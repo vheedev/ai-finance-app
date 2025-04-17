@@ -85,17 +85,6 @@ if not st.session_state.logged_in:
                 st.rerun()
             else:
                 st.error(msg)
-            else:
-                st.error(msg)
-            success, msg = login_user(uname, pwd)
-            if success:
-                st.session_state.last_active = datetime.now()
-                st.session_state.logged_in = True
-                st.session_state.username = uname
-                st.success(f"Welcome back, {uname}!")
-                st.rerun()
-            else:
-                st.error(msg)
     else:
         st.subheader("📝 Register")
         new_un = st.text_input("New Username", key="reg_user")
