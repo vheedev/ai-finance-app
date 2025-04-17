@@ -65,7 +65,7 @@ with col3:
             st.session_state.logged_in = False
             st.session_state.username = ""
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True), unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # --- Login / Register ---
 if not st.session_state.logged_in:
