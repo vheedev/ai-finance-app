@@ -159,6 +159,20 @@ else:
     sel_period = st.session_state.get('sel_period', default_period)
     sel_date   = st.session_state.get('sel_date', today)
 
+    # ——— Months & Calendar selection ———
+    tab1, tab2 = st.tabs(["Quick Select", "Calendar View"])
+    with tab1:
+        st.selectbox(
+            "Pick one of the last 3 months", last_months,
+            index=last_months.index(sel_period), key='sel_period'
+        )
+    with tab2:
+        sel_range = st.date_input(
+            "Or pick a custom date range",
+            value=(today - timedelta(days=30), today),
+            key="sel_range"
+        )
+        
     # Determine year/month
     if isinstance(sel_range, tuple) and len(sel_range) == 2:
         start_date, end_date = sel_range
@@ -223,21 +237,6 @@ else:
             mime="application/pdf",
             key="download_pdf"
         )
-
-    # ——— Months & Calendar selection ———
-    tab1, tab2 = st.tabs(["Quick Select", "Calendar View"])
-    with tab1:
-        st.selectbox(
-            "Pick one of the last 3 months", last_months,
-            index=last_months.index(sel_period), key='sel_period'
-        )
-    with tab2:
-        sel_range = st.date_input(
-            "Or pick a custom date range",
-            value=(today - timedelta(days=30), today),
-            key="sel_range"
-        )
-
 
     # ——— Display report ———
     st.markdown(f"## Report for {sel_year}-{sel_month:02d}")
