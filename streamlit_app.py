@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # — persist login via URL query‑params — 
-params = st.experimental_get_query_params()
+params = st.query_params
 if params.get("logged_in") == ["true"] and "username" in params:
     st.session_state.logged_in  = True
     st.session_state.username   = params["username"][0]
