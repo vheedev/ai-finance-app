@@ -62,29 +62,23 @@ if not st.session_state.logged_in:
     if mode == "Login":
         st.subheader("🔐 Login")
         uname = st.text_input("Username", key="login_user")
-        pwd = st.text_input("Password", type="password", key="login_pass")
+        pwd   = st.text_input("Password", type="password", key="login_pass")
+
+        # This button-handling block must be indented *under* the `if mode == "Login":`
         if st.button("Login", key="login_btn"):
             success, msg = login_user(uname, pwd)
-    if success:
-        # persist login in the URL (only once)
-        st.experimental_set_query_params(logged_in="true", username=uname)
-
-        st.session_state.last_active = datetime.now()
-        st.session_state.logged_in     = True
-        st.session_state.username      = uname
-        st.success(f"Welcome back, {uname}!")
-        st.rerun()
-    else:
-        st.error(msg)
-            success, msg = login_user(uname, pwd)
             if success:
+                # persist login in the URL
+                st.experimental_set_query_params(logged_in="true", username=uname)
+
                 st.session_state.last_active = datetime.now()
-                st.session_state.logged_in = True
-                st.session_state.username = uname
+                st.session_state.logged_in    = True
+                st.session_state.username     = uname
                 st.success(f"Welcome back, {uname}!")
                 st.rerun()
             else:
                 st.error(msg)
+
     else:
         st.subheader("📝 Register")
         new_un = st.text_input("New Username", key="reg_user")
