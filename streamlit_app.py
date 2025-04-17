@@ -55,7 +55,9 @@ with col2:
 with col3:
     if st.session_state.logged_in:
         # inside if success: …
-        st.query_params(logged_in="true", username=uname)
+        # RIGHT — this writes ?logged_in=true&username=<uname> into the URL
+        st.set_query_params(logged_in="true", username=uname)
+
 
         # add top padding for logout button
         st.markdown("<div style='padding-top: 25px;'>", unsafe_allow_html=True)
