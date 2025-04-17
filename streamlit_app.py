@@ -9,11 +9,14 @@ from add_transaction import (
     check_budget_limits,
 )
 # --- Integrations ---
-from integrations.bca import fetch_bca_transactions
-from integrations.mandiri import fetch_mandiri_transactions
-from integrations.shopee import fetch_shopee_transactions
-from integrations.gojek import fetch_gojek_transactions
-from integrations.moka import fetch_moka_transactions
+from integrations.bca       import fetch_bca_transactions
+from integrations.mandiri   import fetch_mandiri_transactions
+from integrations.jago      import fetch_jago_transactions
+from integrations.jenius    import fetch_jenius_transactions
+from integrations.shopee    import fetch_shopee_transactions
+from integrations.tokopedia import fetch_tokopedia_transactions
+from integrations.gopay     import fetch_gopay_transactions
+from integrations.moka      import fetch_moka_transactions
 
 from fpdf import FPDF
 
@@ -60,8 +63,7 @@ if not st.session_state.logged_in:
                 st.rerun()
             else:
                 st.error(msg)
-
-    else:  # Register
+    else:
         st.subheader("📝 Register")
         new_un = st.text_input("New Username", key="reg_user")
         new_pw = st.text_input("New Password", type="password", key="reg_pass")
@@ -90,23 +92,30 @@ else:
 
     st.success(f"Welcome, {st.session_state.username}!")
 
-    # Fetch transactions and ensure dates
-    txns = fetch_all_transactions(st.session_state.username)
+    # Fetch combined transactions
+    local_txns     = fetch_all_transactions(st.session_state.username)
+    bca_txns       = fetch_bca_transactions(st.session_state.username)
+    mandiri_txns  = fetch_mandiri_transactions(st.session_state.username)
+    jago_txns      = fetch_jago_transactions(st.session_state.username)
+    jenius_txns    = fetch_jenius_transactions(st.session_state.username)
+    shopee_txns    = fetch_shopee_transactions(st.session_state.username)
+    tokopedia_txns = fetch_tokopedia_transactions(st.session_state.username)
+    gopay_txns     = fetch_gopay_transactions(st.session_state.username)
+    moka_txns      = fetch_moka_transactions(st.session_state.username)
 
-    # Fetch local db transactions
-    txns = fetch_all_transactions(st.session_state.username)
+    txns = pd.concat([
+        local_txns,
+        bca_txns,
+        mandiri_txns,
+        jago_txns,
+        jenius_txns,
+        shopee_txns,
+        tokopedia_txns,
+        gopay_txns,
+        moka_txns
+    ], ignore_index=True)
 
-    # Fetch external transactions
-    bca_txns     = fetch_bca_transactions(st.session_state.username)
-    mandiri_txns= fetch_mandiri_transactions(st.session_state.username)
-    shopee_txns = fetch_shopee_transactions(st.session_state.username)
-    gojek_txns  = fetch_gojek_transactions(st.session_state.username)
-    moka_txns   = fetch_moka_transactions(st.session_state.username)
-
-    # Combine all
-    ext_txns = pd.concat([bca_txns, mandiri_txns, shopee_txns, gojek_txns, moka_txns], ignore_index=True)
-    txns     = pd.concat([txns, ext_txns], ignore_index=True)
-
+    # Ensure dates
     txns['date'] = pd.to_datetime(txns['date'])
 
     # ——— Compute period bounds ———
@@ -118,32 +127,31 @@ else:
         last_months.append(m.strftime("%Y-%m"))
     last_months = last_months[::-1]
 
-    # Load previous or default selection
+    # Load or default selection
     default_period = last_months[-1]
     sel_period = st.session_state.get('sel_period', default_period)
-    sel_date = st.session_state.get('sel_date', today)
+    sel_date   = st.session_state.get('sel_date', today)
 
-    # Determine numeric year/month
+    # Determine year/month
     if sel_date != today:
         sel_year, sel_month = sel_date.year, sel_date.month
     else:
         sel_year, sel_month = map(int, sel_period.split("-"))
 
-    # Filter transactions for that period
+    # Filter transactions for the period
     df_period = txns[
-        (txns['date'].dt.year == sel_year) &
+        (txns['date'].dt.year  == sel_year) &
         (txns['date'].dt.month == sel_month)
     ]
 
-    # Compute summary, tax, and alerts for df_period
+    # Compute metrics
     summary = show_summary(df_period)
     est_tax = calculate_tax(df_period)
-    alerts = check_budget_limits(df_period)
+    alerts  = check_budget_limits(df_period)
 
     # ——— Download PDF button (top-right) ———
     _, btn_col = st.columns([7, 3])
     with btn_col:
-        # Build PDF in memory
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", 'B', 16)
@@ -152,8 +160,7 @@ else:
         pdf.cell(0, 8, f"User: {st.session_state.username}", ln=1)
         pdf.cell(0, 8, f"Period: {sel_year}-{sel_month:02d}", ln=1)
         pdf.ln(5)
-        
-        # Summary stats for PDF
+
         summ = summary.round(2)
         pdf.set_font("Arial", 'B', 12)
         pdf.cell(0, 8, "Summary Statistics", ln=1)
@@ -166,7 +173,6 @@ else:
             )
         pdf.ln(5)
 
-        # Tax & alerts for PDF
         pdf.set_font("Arial", 'B', 12)
         pdf.cell(0, 8, f"Estimated Tax (10%): Rp {est_tax:,.2f}", ln=1)
         pdf.ln(3)
@@ -187,7 +193,7 @@ else:
             key="download_pdf"
         )
 
-    # ——— Months & Calendar selection (below PDF) ———
+    # ——— Months & Calendar selection ———
     tab1, tab2 = st.tabs(["Quick Select", "Calendar View"])
     with tab1:
         st.selectbox(
@@ -199,15 +205,12 @@ else:
             "Or pick any date", value=sel_date, key='sel_date'
         )
 
-    # ——— Display report for that period ———
+    # ——— Display report ———
     st.markdown(f"## Report for {sel_year}-{sel_month:02d}")
-
     st.markdown("### 📊 Summary Report")
     st.dataframe(summary)
-
     st.markdown("### 💡 Estimated Tax")
     st.info(f"💡 Estimated tax this month: Rp {est_tax:,.1f}")
-
     st.markdown("### 🚦 Budget Alerts")
     if not alerts:
         st.write("No alerts!")
