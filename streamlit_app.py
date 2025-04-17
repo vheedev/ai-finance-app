@@ -1,5 +1,5 @@
 import streamlit as st
-import pandas as pd 
+import pandas as pd
 from datetime import datetime, date, timedelta
 from database_setup import login_user, register_user
 from add_transaction import (
@@ -35,9 +35,9 @@ hide_deprecation = """
 st.markdown(hide_deprecation, unsafe_allow_html=True)
 
 # --- Persist login via Query Params ---
-params = st.experimental_get_query_params()
+params = st.query_params
 if params.get("logged_in") == ["true"] and "username" in params:
-    st.session_state.logged_in  = True
+    st.session_state.logged_in = True
     st.session_state.username   = params["username"][0]
 
 # --- Session state defaults ---
@@ -57,39 +57,47 @@ with col2:
     )
 with col3:
     if st.session_state.logged_in:
+        # add top padding for logout button
+        st.markdown("<div style='padding-top: 25px;'>", unsafe_allow_html=True)
         if st.button("Logout", key="logout_btn"):
-            # clear the URL params so refresh truly logs out
-            st.experimental_set_query_params()
-
+            # clear URL params on logout
+            st.set_query_params()
             st.session_state.logged_in = False
-            st.session_state.username  = ""
+            st.session_state.username = ""
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-# --- Login / Register ---
+# --- Login / Register / Register ---
 if not st.session_state.logged_in:
     mode = st.selectbox("Select mode", ["Login", "Register"], key="mode_select")
 
     if mode == "Login":
         st.subheader("🔐 Login")
         uname = st.text_input("Username", key="login_user")
-        pwd   = st.text_input("Password", type="password", key="login_pass")
-
-        # This button-handling block must be indented *under* the `if mode == "Login":`
+        pwd = st.text_input("Password", type="password", key="login_pass")
         if st.button("Login", key="login_btn"):
             success, msg = login_user(uname, pwd)
             if success:
-                # persist login in the URL
+                # persist login in URL
                 st.experimental_set_query_params(logged_in="true", username=uname)
-
                 st.session_state.last_active = datetime.now()
-                st.session_state.logged_in    = True
-                st.session_state.username     = uname
+                st.session_state.logged_in = True
+                st.session_state.username = uname
                 st.success(f"Welcome back, {uname}!")
                 st.rerun()
             else:
                 st.error(msg)
-
+    else:
+                st.error(msg)
+            success, msg = login_user(uname, pwd)
+            if success:
+                st.session_state.last_active = datetime.now()
+                st.session_state.logged_in = True
+                st.session_state.username = uname
+                st.success(f"Welcome back, {uname}!")
+                st.rerun()
+            else:
+                st.error(msg)
     else:
         st.subheader("📝 Register")
         new_un = st.text_input("New Username", key="reg_user")
@@ -159,34 +167,16 @@ else:
     sel_period = st.session_state.get('sel_period', default_period)
     sel_date   = st.session_state.get('sel_date', today)
 
-    # ——— Months & Calendar selection ———
-    tab1, tab2 = st.tabs(["Quick Select", "Calendar View"])
-    with tab1:
-        st.selectbox(
-            "Pick one of the last 3 months", last_months,
-            index=last_months.index(sel_period), key='sel_period'
-        )
-    with tab2:
-        sel_range = st.date_input(
-            "Or pick a custom date range",
-            value=(today - timedelta(days=30), today),
-            key="sel_range"
-        )
-        
     # Determine year/month
-    if isinstance(sel_range, tuple) and len(sel_range) == 2:
-        start_date, end_date = sel_range
+    if sel_date != today:
+        sel_year, sel_month = sel_date.year, sel_date.month
     else:
-        # fallback to single month mode
         sel_year, sel_month = map(int, sel_period.split("-"))
-        start_date = date(sel_year, sel_month, 1)
-        next_month = start_date + pd.DateOffset(months=1)
-        end_date = next_month - pd.Timedelta(days=1)
 
-    # Filter by full date range
+    # Filter transactions for the period
     df_period = txns[
-        (txns["date"].dt.date >= start_date) &
-        (txns["date"].dt.date <= end_date)
+        (txns['date'].dt.year  == sel_year) &
+        (txns['date'].dt.month == sel_month)
     ]
 
     # Compute metrics
@@ -203,7 +193,7 @@ else:
         pdf.cell(0, 10, "Financial Report", ln=1, align='C')
         pdf.set_font("Arial", '', 12)
         pdf.cell(0, 8, f"User: {st.session_state.username}", ln=1)
-        pdf.cell(0, 8, f"Period: {sel_year}-{sel_month:02d}", ln=1)
+        pdf.cell(0, 8, f"Period: {start_date} to {end_date}", ln=1)
         pdf.ln(5)
 
         summ = summary.round(2)
@@ -236,6 +226,18 @@ else:
             file_name=f"report_{sel_year}-{sel_month:02d}.pdf",
             mime="application/pdf",
             key="download_pdf"
+        )
+
+    # ——— Months & Calendar selection ———
+    tab1, tab2 = st.tabs(["Quick Select", "Calendar View"])
+    with tab1:
+        st.selectbox(
+            "Pick one of the last 3 months", last_months,
+            index=last_months.index(sel_period), key='sel_period'
+        )
+    with tab2:
+        st.date_input(
+            "Or pick any date", value=sel_date, key='sel_date'
         )
 
     # ——— Display report ———
