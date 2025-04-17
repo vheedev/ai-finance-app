@@ -1,3 +1,5 @@
+cat > integrations/bca.py << 'EOF'
+
 # File: integrations/bca.py
 import pandas as pd
 
@@ -14,3 +16,5 @@ def fetch_bca_transactions(username: str) -> pd.DataFrame:
     ]
     # TODO: replace with real BCA API calls
     return pd.DataFrame([])
+
+EOF
