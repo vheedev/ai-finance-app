@@ -1,5 +1,12 @@
 import streamlit as st
 import pandas as pd
+
+# — persist login via URL query‑params — 
+params = st.experimental_get_query_params()
+if params.get("logged_in") == ["true"] and "username" in params:
+    st.session_state.logged_in  = True
+    st.session_state.username   = params["username"][0]
+    
 from datetime import datetime, date, timedelta
 from database_setup import login_user, register_user
 from add_transaction import (
@@ -24,7 +31,7 @@ from fpdf import FPDF
 st.set_page_config(page_title="Fintari", page_icon="logo.png", layout="centered")
 
 # --- Persist login via Query Params ---
-params = st.query_params()
+params = st.experimental_set_query_params()
 if params.get("logged_in") == ["true"] and "username" in params:
     # restore session state from URL parameters
     st.session_state.logged_in = True
@@ -47,9 +54,15 @@ with col2:
     )
 with col3:
     if st.session_state.logged_in:
+        # inside if success: …
+        st.experimental_set_query_params(logged_in="true", username=uname)
+
         # add top padding for logout button
         st.markdown("<div style='padding-top: 25px;'>", unsafe_allow_html=True)
         if st.button("Logout", key="logout_btn"):
+            # inside your Logout handler
+            st.experimental_set_query_params()  # clears the query params
+
             st.session_state.logged_in = False
             st.session_state.username = ""
             st.rerun()
