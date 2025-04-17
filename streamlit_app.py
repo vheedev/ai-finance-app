@@ -35,10 +35,10 @@ hide_deprecation = """
 st.markdown(hide_deprecation, unsafe_allow_html=True)
 
 # --- Persist login via Query Params ---
-params = st.experimental_get_query_params
+params = st.experimental_get_query_params()
 if params.get("logged_in") == ["true"] and "username" in params:
     st.session_state.logged_in = True
-    st.session_state.username   = params["username"][0]
+    st.session_state.username  = params["username"][0]
 
 # --- Session state defaults ---
 if "logged_in" not in st.session_state:
