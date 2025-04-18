@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+.env
+*.log
+.ipynb_checkpoints/
+node_modules/
+.mypy_cache/
+.devcontainer/
