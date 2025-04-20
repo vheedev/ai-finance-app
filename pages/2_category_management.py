@@ -34,9 +34,17 @@ def get_cat_names():
 def get_cat_by_name(name):
     return next((c for c in st.session_state.categories if c['name'] == name), None)
 
+def load_user_categories(username): return []
+def load_user_transactions(username): return []
+
+if "categories" not in st.session_state:
+    st.session_state.categories = load_user_categories(username)
+if "transactions" not in st.session_state:
+    st.session_state.transactions = load_user_transactions(username)
+    
 st.title("🗂️ Category Management")
 
-# Add/Edit Category Section
+# Add/Edit/Delete Category Section
 with st.expander("Add / Edit Category"):
     col1, col2 = st.columns(2)
     with col1:

@@ -25,6 +25,13 @@ st.markdown("""
 </div>
 """.format(st.session_state.get("username","Guest")), unsafe_allow_html=True)
 
+def load_user_categories(username): return []
+def load_user_transactions(username): return []
+
+if "categories" not in st.session_state:
+    st.session_state.categories = load_user_categories(username)
+if "transactions" not in st.session_state:
+    st.session_state.transactions = load_user_transactions(username)
 
 st.title("📊 Dashboard")
 st.write("Your latest financial overview and smart AI insights.")

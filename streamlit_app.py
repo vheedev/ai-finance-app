@@ -54,3 +54,11 @@ st.markdown("""
 """.format(st.session_state.get("username","Guest")), unsafe_allow_html=True)
 
 st.success(f"Hello, {st.session_state['username']}! Use the sidebar to navigate the app.")
+
+def load_user_categories(username): return []
+def load_user_transactions(username): return []
+
+if "categories" not in st.session_state:
+    st.session_state.categories = load_user_categories(username)
+if "transactions" not in st.session_state:
+    st.session_state.transactions = load_user_transactions(username)
