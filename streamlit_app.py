@@ -7,8 +7,6 @@ from auth import login, register
 with open("static/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-st.set_page_config(page_title="Login | AI Finance App", page_icon="💸")
-
 st.image("logo.png", width=100)
 st.title("💸 AI Finance App")
 
