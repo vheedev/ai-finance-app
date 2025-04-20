@@ -156,8 +156,8 @@ else:
     # --------- Top Row: Add New Data button (left) and Download PDF (right) ---------
     col_left, col_center, col_right = st.columns([2, 3, 2])
     with col_right:
-    if st.button("➕ Add New Data", key="add_new_data_btn"):
-        st.session_state.show_add_form = True
+        if st.button("➕ Add New Data", key="add_new_data_btn"):
+            st.session_state.show_add_form = True
     
         # Generate summary and PDF for all transactions
         summary_all = show_summary(txns)
@@ -246,7 +246,7 @@ else:
             st.markdown("### 📊 Summary Report")
             summary1_df = summary1.reset_index()
             if len(summary1_df.columns) == 2:
-                summary1_df.columns = ["Category", "Total Amount"]
+                summary_df.columns = ["Category", "Total Amount"]
             st.bar_chart(summary1_df.set_index(summary1_df.columns[0])[summary1_df.columns[1]])
             st.dataframe(summary1_df, use_container_width=True)
 
@@ -266,13 +266,13 @@ else:
             download_slot = btn_col.empty()
 
             start_date, end_date = st.date_input(
-                "🗓 Select report range",
-                value=(today.replace(day=1), today),
-                format="YYYY-MM-DD"
+            "🗓 Select report range",
+            value=(today.replace(day=1), today),
+            format="YYYY-MM-DD"
             )
             mask = (
-                (txns["date"] >= pd.to_datetime(start_date)) &
-                (txns["date"] <= pd.to_datetime(end_date))
+            (txns["date"] >= pd.to_datetime(start_date)) &
+            (txns["date"] <= pd.to_datetime(end_date))
             )
             filtered = txns.loc[mask]
             st.write("🔍 Filtered rows (Calendar-View):", filtered.shape[0])
@@ -298,22 +298,22 @@ else:
                 for cat, amt in alerts:
                     st.write(f"- {cat}: Rp {amt:,.0f}")
             
-            # --- Smart Finance Insights (insert here!) ---
+            # --- Smart Finance Insights: use filtered, not filt1 ---
             st.markdown("## 🤖 Smart Finance Insights")
 
-            forecast, f_msg = forecast_next_month_expense(filt1)  # or use the filtered DataFrame for this period
+            forecast, f_msg = forecast_next_month_expense(filtered)
             if forecast is not None:
                 st.info(f"**Next Month Expense Forecast:** Rp {forecast:,.0f}\n\n_{f_msg}_")
             else:
                 st.warning(f_msg)
 
-            budget, b_msg = suggest_budget(filt1)
+            budget, b_msg = suggest_budget(filtered)
             if budget is not None:
                 st.info(f"**Suggested Monthly Budget:** Rp {budget:,.0f}\n\n_{b_msg}_")
             else:
                 st.warning(b_msg)
 
-            recurring = detect_recurring(filt1)
+            recurring = detect_recurring(filtered)
             st.markdown("**Recurring Transaction Candidates:**")
             if recurring is None or recurring.empty:
                 st.write("No recurring transactions detected.")
