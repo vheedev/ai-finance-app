@@ -146,11 +146,13 @@ else:
     ]
 
     # --------- Top Row: Add New Data button (left) and Download PDF (right) ---------
-    col_btn1, col_btn2 = st.columns([1, 1])
-    with col_btn1:
-        if st.button("➕ Add New Data", key="add_new_data_btn"):
-            st.session_state.show_add_form = True
-    with col_btn2:
+    col_left, col_right = st.columns([3, 2, 2])
+    with col2:
+        c1, c2 = st.columns([1, 1])
+        with c1:
+            if st.button("➕ Add New Data", key="add_new_data_btn"):
+                st.session_state.show_add_form = True
+        with c2:
         # Generate summary and PDF for all transactions
         summary_all = show_summary(txns)
         est_tax_all = calculate_tax(txns)
