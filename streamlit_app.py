@@ -66,6 +66,8 @@ with col3:
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
+print("Current session_state keys:", st.session_state.keys())
+
 # --- Login / Register ---
 if not st.session_state.logged_in:
     mode = st.selectbox("Select mode", ["Login", "Register"], key="mode_select")
@@ -217,7 +219,7 @@ else:
                 "Pick one of the last 3 months",
                 last_months,
                 index=last_months.index(st.session_state.get('sel_period_quick', last_months[-1])),
-                key="sel_period_quick"
+                key="sel_period_uniq_vheedev_2025"
             )
             year, month = map(int, sel_period.split("-"))
             filt1 = txns[
