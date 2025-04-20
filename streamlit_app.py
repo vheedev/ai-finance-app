@@ -66,8 +66,6 @@ with col3:
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-print("Current session_state keys:", st.session_state.keys())
-
 # --- Login / Register ---
 if not st.session_state.logged_in:
     mode = st.selectbox("Select mode", ["Login", "Register"], key="mode_select")
@@ -100,7 +98,7 @@ if not st.session_state.logged_in:
 
 # --- Main app (after login) ---
 else:
-    # Session timeout logic
+    # Session timeout: 15 min
     now = datetime.now()
     timeout = timedelta(minutes=15)
     if "last_active" not in st.session_state:
@@ -115,16 +113,16 @@ else:
 
     st.success(f"Welcome, {st.session_state.username}!")
 
-    # Fetch all transactions (as before)
-    local_txns = fetch_all_transactions(st.session_state.username)
-    bca_txns = fetch_bca_transactions(st.session_state.username)
-    mandiri_txns = fetch_mandiri_transactions(st.session_state.username)
-    jago_txns = fetch_jago_transactions(st.session_state.username)
-    jenius_txns = fetch_jenius_transactions(st.session_state.username)
-    shopee_txns = fetch_shopee_transactions(st.session_state.username)
-    tokopedia_txns = fetch_tokopedia_transactions(st.session_state.username)
-    gopay_txns = fetch_gopay_transactions(st.session_state.username)
-    moka_txns = fetch_moka_transactions(st.session_state.username)
+    # Fetch all transactions
+    local_txns    = fetch_all_transactions(st.session_state.username)
+    bca_txns      = fetch_bca_transactions(st.session_state.username)
+    mandiri_txns  = fetch_mandiri_transactions(st.session_state.username)
+    jago_txns     = fetch_jago_transactions(st.session_state.username)
+    jenius_txns   = fetch_jenius_transactions(st.session_state.username)
+    shopee_txns   = fetch_shopee_transactions(st.session_state.username)
+    tokopedia_txns= fetch_tokopedia_transactions(st.session_state.username)
+    gopay_txns    = fetch_gopay_transactions(st.session_state.username)
+    moka_txns     = fetch_moka_transactions(st.session_state.username)
 
     txns = pd.concat([
         local_txns,
@@ -139,6 +137,7 @@ else:
     ], ignore_index=True)
     txns["date"] = pd.to_datetime(txns['date'])
 
+    # Prepare periods
     today = datetime.today().date()
     first_of_month = today.replace(day=1)
     last_months = [
@@ -146,11 +145,13 @@ else:
         for i in range(3, 0, -1)
     ]
 
+    # --------- Top Row: Add New Data button (left) and Download PDF (right) ---------
     col_left, col_right = st.columns([7, 3])
     with col_left:
         if st.button("➕ Add New Data", key="add_new_data_btn"):
             st.session_state.show_add_form = True
     with col_right:
+        # Generate summary and PDF for all transactions
         summary_all = show_summary(txns)
         est_tax_all = calculate_tax(txns)
         alerts_all  = check_budget_limits(txns)
@@ -189,6 +190,7 @@ else:
             key="download_pdf_homepage"
         )
 
+    # --- Show Add Form or Main Dashboard ---
     if st.session_state.get("show_add_form", False):
         st.markdown("## 📝 Add New Transaction")
         with st.form("add_txn_form", clear_on_submit=True):
@@ -214,12 +216,13 @@ else:
     else:
         tab1, tab2 = st.tabs(["Quick Select", "Calendar View"])
 
+        # --- Quick Select ---
         with tab1:
             sel_period = st.selectbox(
                 "Pick one of the last 3 months",
                 last_months,
                 index=last_months.index(st.session_state.get('sel_period_quick', last_months[-1])),
-                key="sel_period_uniq_vheedev_2025"
+                key="sel_period_quick"
             )
             year, month = map(int, sel_period.split("-"))
             filt1 = txns[
@@ -249,6 +252,7 @@ else:
                 for cat, amt in alerts1:
                     st.write(f"- {cat}: Rp {amt:,.0f}")
 
+        # --- Calendar View ---
         with tab2:
             _, btn_col = st.columns([7, 3])
             download_slot = btn_col.empty()
