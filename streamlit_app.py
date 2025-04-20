@@ -10,6 +10,9 @@ from add_transaction import (
     check_budget_limits,
     add_transaction,
 )
+
+from finance_insights import forecast_next_month_expense, suggest_budget, detect_recurring
+
 # --- Integrations ---
 from integrations.bca       import fetch_bca_transactions
 from integrations.mandiri   import fetch_mandiri_transactions
@@ -291,3 +294,26 @@ else:
             else:
                 for cat, amt in alerts:
                     st.write(f"- {cat}: Rp {amt:,.0f}")
+            
+            # --- Smart Finance Insights (insert here!) ---
+            st.markdown("## 🤖 Smart Finance Insights")
+
+            forecast, f_msg = forecast_next_month_expense(filt1)  # or use the filtered DataFrame for this period
+            if forecast is not None:
+                st.info(f"**Next Month Expense Forecast:** Rp {forecast:,.0f}\n\n_{f_msg}_")
+            else:
+                st.warning(f_msg)
+
+            budget, b_msg = suggest_budget(filt1)
+            if budget is not None:
+                st.info(f"**Suggested Monthly Budget:** Rp {budget:,.0f}\n\n_{b_msg}_")
+            else:
+                st.warning(b_msg)
+
+            recurring = detect_recurring(filt1)
+            st.markdown("**Recurring Transaction Candidates:**")
+            if recurring is None or recurring.empty:
+                st.write("No recurring transactions detected.")
+            else:
+                st.dataframe(recurring, use_container_width=True)
+    st.dataframe(recurring, use_container_width=True)
