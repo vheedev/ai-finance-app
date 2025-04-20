@@ -147,7 +147,7 @@ else:
 
     # --------- Top Row: Add New Data button (left) and Download PDF (right) ---------
     col_left, col_right = st.columns([7, 3])
-    with col_left:
+    with col_center:
         if st.button("➕ Add New Data", key="add_new_data_btn"):
             st.session_state.show_add_form = True
     with col_right:
