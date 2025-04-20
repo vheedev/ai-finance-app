@@ -180,7 +180,7 @@ else:
                 pdf.cell(0, 6, f"- {cat}: Rp {amt:,.0f}", ln=1)
         pdf_bytes_all = pdf.output(dest="S").encode("latin-1")
         st.download_button(
-            label="⬇️ Download Report PDF",
+            label="⬇️ Download Report",
             data=pdf_bytes_all,
             file_name="financial_report.pdf",
             mime="application/pdf",
@@ -245,45 +245,6 @@ else:
         summary = show_summary(filtered)
         est_tax = calculate_tax(filtered)
         alerts  = check_budget_limits(filtered)
-
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", "B", 16)
-        pdf.cell(0, 10, "Financial Report", ln=1, align="C")
-        pdf.set_font("Arial", "", 12)
-        pdf.cell(0, 8, f"User: {st.session_state.username}", ln=1)
-        pdf.cell(0, 8, f"Period: {start_date} to {end_date}", ln=1)
-        pdf.ln(5)
-
-        pdf.set_font("Arial", "B", 12)
-        pdf.cell(0, 8, "Summary Statistics", ln=1)
-        pdf.set_font("Arial", "", 10)
-        for idx, row in summary.round(2).iterrows():
-            line = ", ".join(f"{col}={row[col]}" for col in summary.columns)
-            pdf.cell(0, 6, f"{idx}: {line}", ln=1)
-        pdf.ln(5)
-
-        pdf.set_font("Arial", "B", 12)
-        pdf.cell(0, 8, f"Estimated Tax (10%): Rp {est_tax:,.2f}", ln=1)
-        pdf.ln(3)
-
-        pdf.set_font("Arial", "B", 12)
-        pdf.cell(0, 8, "Budget Alerts:", ln=1)
-        pdf.set_font("Arial", "", 10)
-        if not alerts:
-            pdf.cell(0, 6, "None", ln=1)
-        else:
-            for cat, amt in alerts:
-                pdf.cell(0, 6, f"- {cat}: Rp {amt:,.0f}", ln=1)
-
-        pdf_bytes = pdf.output(dest="S").encode("latin-1")
-        download_slot.download_button(
-            label="⬇️ Download Report",
-            data=pdf_bytes,
-            file_name=f"report_{start_date:%Y%m%d}_{end_date:%Y%m%d}.pdf",
-            mime="application/pdf",
-            key="download_pdf_calendar"
-        )
 
         st.markdown("### 📊 Summary Report")
         summary_df = summary.reset_index()
