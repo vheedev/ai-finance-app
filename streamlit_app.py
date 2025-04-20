@@ -12,6 +12,7 @@ from add_transaction import (
 )
 
 from finance_insights import forecast_next_month_expense, suggest_budget, detect_recurring
+from dummy_data import make_dummy_transactions
 
 # --- Integrations ---
 from integrations.bca       import fetch_bca_transactions
@@ -116,6 +117,10 @@ else:
 
     st.success(f"Welcome, {st.session_state.username}!")
 
+    if txns.empty:
+    st.warning("No real transaction data found. Showing dummy data for demo purposes.")
+    txns = make_dummy_transactions()
+    
     # Fetch all transactions
     local_txns    = fetch_all_transactions(st.session_state.username)
     bca_txns      = fetch_bca_transactions(st.session_state.username)
