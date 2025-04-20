@@ -7,8 +7,11 @@ from auth import login, register
 with open("static/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-st.image("logo.png", width=100)
-st.title("💸 AI Finance App")
+col1, col2 = st.columns([1, 3])  # Adjust the ratio as you like (logo: 1, title: 3)
+with col1:
+    st.image("logo.png", width=80)  # Adjust width as needed
+with col2:
+    st.markdown("<h1 style='margin-top: 15px;'>Fintari</h1>", unsafe_allow_html=True)
 
 # --- LOGIN/REGISTER FLOW ---
 if "username" not in st.session_state:
