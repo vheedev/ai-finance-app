@@ -1,12 +1,14 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, date, timedelta
+
 from database_setup import login_user, register_user
 from add_transaction import (
     fetch_all_transactions,
     show_summary,
     calculate_tax,
     check_budget_limits,
+    add_transaction,
 )
 # --- Integrations ---
 from integrations.bca       import fetch_bca_transactions
@@ -20,13 +22,12 @@ from integrations.moka      import fetch_moka_transactions
 
 from fpdf import FPDF
 
-# --- Page config ---
+# --- Page config --- MUST BE THE VERY FIRST STREAMLIT COMMAND
 st.set_page_config(page_title="Fintari", page_icon="logo.png", layout="centered")
 
-# -- Hide Streamlit deprecation banners (CSS hack) --
+# -- Hide Streamlit deprecation banners --
 hide_deprecation = """
 <style>
-  /* hide warning alert banners */
   div[data-testid="stAlert"] > div[role="alert"] {
     display: none !important;
   }
@@ -57,10 +58,8 @@ with col2:
     )
 with col3:
     if st.session_state.logged_in:
-        # add top padding for logout button
         st.markdown("<div style='padding-top: 25px;'>", unsafe_allow_html=True)
         if st.button("Logout", key="logout_btn"):
-            # clear URL params on logout
             st.experimental_set_query_params()
             st.session_state.logged_in = False
             st.session_state.username = ""
@@ -70,7 +69,6 @@ with col3:
 # --- Login / Register ---
 if not st.session_state.logged_in:
     mode = st.selectbox("Select mode", ["Login", "Register"], key="mode_select")
-
     if mode == "Login":
         st.subheader("🔐 Login")
         uname = st.text_input("Username", key="login_user")
@@ -100,13 +98,13 @@ if not st.session_state.logged_in:
 
 # --- Main app (after login) ---
 else:
-    # Session timeout: 15 min inactivity
+    # Session timeout: 15 min
     now = datetime.now()
     timeout = timedelta(minutes=15)
     if "last_active" not in st.session_state:
         st.session_state.last_active = now
     elif now - st.session_state.last_active > timeout:
-        st.warning("Session timed out due to inactivity. Please log in again.")
+        st.warning("Session timed out. Please log in again.")
         st.session_state.logged_in = False
         st.session_state.username = ""
         st.rerun()
@@ -115,16 +113,16 @@ else:
 
     st.success(f"Welcome, {st.session_state.username}!")
 
-    # Fetch combined transactions
-    local_txns     = fetch_all_transactions(st.session_state.username)
-    bca_txns       = fetch_bca_transactions(st.session_state.username)
+    # Fetch all transactions
+    local_txns    = fetch_all_transactions(st.session_state.username)
+    bca_txns      = fetch_bca_transactions(st.session_state.username)
     mandiri_txns  = fetch_mandiri_transactions(st.session_state.username)
-    jago_txns      = fetch_jago_transactions(st.session_state.username)
-    jenius_txns    = fetch_jenius_transactions(st.session_state.username)
-    shopee_txns    = fetch_shopee_transactions(st.session_state.username)
-    tokopedia_txns = fetch_tokopedia_transactions(st.session_state.username)
-    gopay_txns     = fetch_gopay_transactions(st.session_state.username)
-    moka_txns      = fetch_moka_transactions(st.session_state.username)
+    jago_txns     = fetch_jago_transactions(st.session_state.username)
+    jenius_txns   = fetch_jenius_transactions(st.session_state.username)
+    shopee_txns   = fetch_shopee_transactions(st.session_state.username)
+    tokopedia_txns= fetch_tokopedia_transactions(st.session_state.username)
+    gopay_txns    = fetch_gopay_transactions(st.session_state.username)
+    moka_txns     = fetch_moka_transactions(st.session_state.username)
 
     txns = pd.concat([
         local_txns,
@@ -137,106 +135,128 @@ else:
         gopay_txns,
         moka_txns
     ], ignore_index=True)
+    txns["date"] = pd.to_datetime(txns['date'])
 
-    # Ensure dates
-    txns['date'] = pd.to_datetime(txns['date'])
-
-    # ——— Compute period bounds ———
+    # Prepare periods
     today = datetime.today().date()
-    last_months = []
     first_of_month = today.replace(day=1)
-    for i in range(1, 4):
-        m = first_of_month - pd.DateOffset(months=i)
-        last_months.append(m.strftime("%Y-%m"))
-    last_months = last_months[::-1]
-
-    # Load or default selection
-    default_period = last_months[-1]
-    sel_period = st.session_state.get('sel_period', default_period)
-    sel_date   = st.session_state.get('sel_date', today)
-
-    # Determine year/month
-    if sel_date != today:
-        sel_year, sel_month = sel_date.year, sel_date.month
-    else:
-        sel_year, sel_month = map(int, sel_period.split("-"))
-
-    # Filter transactions for the period
-    df_period = txns[
-        (txns['date'].dt.year  == sel_year) &
-        (txns['date'].dt.month == sel_month)
+    last_months = [
+        (first_of_month - pd.DateOffset(months=i)).strftime("%Y-%m")
+        for i in range(3, 0, -1)
     ]
 
-    # Compute metrics
-    summary = show_summary(df_period)
-    est_tax = calculate_tax(df_period)
-    alerts  = check_budget_limits(df_period)
+    # Tabs
+    tab1, tab2 = st.tabs(["Quick Select", "Calendar View"])
 
-    # ——— Download PDF button (top-right) ———
-    _, btn_col = st.columns([7, 3])
-    with btn_col:
+    # --- Quick Select ---
+    with tab1:
+        sel_period = st.selectbox(
+            "Pick one of the last 3 months",
+            last_months,
+            index=last_months.index(st.session_state.get('sel_period', last_months[-1])),
+            key="sel_period"
+        )
+        year, month = map(int, sel_period.split("-"))
+        filt1 = txns[
+            (txns["date"].dt.year  == year) &
+            (txns["date"].dt.month == month)
+        ]
+        st.write("🔍 Filtered rows (Quick-Select):", filt1.shape[0])
+
+        summary1 = show_summary(filt1)
+        est_tax1 = calculate_tax(filt1)
+        alerts1  = check_budget_limits(filt1)
+
+        st.markdown("### 📊 Summary Report")
+        summary1_df = summary1.reset_index()
+        if len(summary1_df.columns) == 2:
+            summary1_df.columns = ["Category", "Total Amount"]
+        st.bar_chart(summary1_df.set_index(summary1_df.columns[0])[summary1_df.columns[1]])
+        st.dataframe(summary1_df, use_container_width=True)
+
+        st.markdown("### 💡 Estimated Tax")
+        st.info(f"Rp {est_tax1:,.2f}")
+
+        st.markdown("### 🚦 Budget Alerts")
+        if not alerts1:
+            st.write("No alerts 🎉")
+        else:
+            for cat, amt in alerts1:
+                st.write(f"- {cat}: Rp {amt:,.0f}")
+
+    # --- Calendar View ---
+    with tab2:
+        _, btn_col = st.columns([7, 3])
+        download_slot = btn_col.empty()
+
+        start_date, end_date = st.date_input(
+            "🗓 Select report range",
+            value=(today.replace(day=1), today),
+            format="YYYY-MM-DD"
+        )
+        mask = (
+            (txns["date"] >= pd.to_datetime(start_date)) &
+            (txns["date"] <= pd.to_datetime(end_date))
+        )
+        filtered = txns.loc[mask]
+        st.write("🔍 Filtered rows (Calendar-View):", filtered.shape[0])
+
+        summary = show_summary(filtered)
+        est_tax = calculate_tax(filtered)
+        alerts  = check_budget_limits(filtered)
+
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", 'B', 16)
-        pdf.cell(0, 10, "Financial Report", ln=1, align='C')
-        pdf.set_font("Arial", '', 12)
+        pdf.set_font("Arial", "B", 16)
+        pdf.cell(0, 10, "Financial Report", ln=1, align="C")
+        pdf.set_font("Arial", "", 12)
         pdf.cell(0, 8, f"User: {st.session_state.username}", ln=1)
         pdf.cell(0, 8, f"Period: {start_date} to {end_date}", ln=1)
         pdf.ln(5)
 
-        summ = summary.round(2)
-        pdf.set_font("Arial", 'B', 12)
+        pdf.set_font("Arial", "B", 12)
         pdf.cell(0, 8, "Summary Statistics", ln=1)
-        pdf.set_font("Arial", '', 10)
-        for idx, row in summ.iterrows():
-            pdf.cell(
-                0, 6,
-                f"{idx}: " + ", ".join([f"{col}={row[col]}" for col in summ.columns]),
-                ln=1
-            )
+        pdf.set_font("Arial", "", 10)
+        for idx, row in summary.round(2).iterrows():
+            line = ", ".join(f"{col}={row[col]}" for col in summary.columns)
+            pdf.cell(0, 6, f"{idx}: {line}", ln=1)
         pdf.ln(5)
 
-        pdf.set_font("Arial", 'B', 12)
+        pdf.set_font("Arial", "B", 12)
         pdf.cell(0, 8, f"Estimated Tax (10%): Rp {est_tax:,.2f}", ln=1)
         pdf.ln(3)
+
+        pdf.set_font("Arial", "B", 12)
         pdf.cell(0, 8, "Budget Alerts:", ln=1)
-        pdf.set_font("Arial", '', 10)
+        pdf.set_font("Arial", "", 10)
         if not alerts:
             pdf.cell(0, 6, "None", ln=1)
         else:
             for cat, amt in alerts:
                 pdf.cell(0, 6, f"- {cat}: Rp {amt:,.0f}", ln=1)
 
-        pdf_bytes = pdf.output(dest='S').encode('latin-1')
-        st.download_button(
+        pdf_bytes = pdf.output(dest="S").encode("latin-1")
+        download_slot.download_button(
             label="⬇️ Download Report",
             data=pdf_bytes,
-            file_name=f"report_{sel_year}-{sel_month:02d}.pdf",
+            file_name=f"report_{start_date:%Y%m%d}_{end_date:%Y%m%d}.pdf",
             mime="application/pdf",
-            key="download_pdf"
+            key="download_pdf_calendar"
         )
 
-    # ——— Months & Calendar selection ———
-    tab1, tab2 = st.tabs(["Quick Select", "Calendar View"])
-    with tab1:
-        st.selectbox(
-            "Pick one of the last 3 months", last_months,
-            index=last_months.index(sel_period), key='sel_period'
-        )
-    with tab2:
-        st.date_input(
-            "Or pick any date", value=sel_date, key='sel_date'
-        )
+        st.markdown("### 📊 Summary Report")
+        summary_df = summary.reset_index()
+        if len(summary_df.columns) == 2:
+            summary_df.columns = ["Category", "Total Amount"]
+        st.bar_chart(summary_df.set_index(summary_df.columns[0])[summary_df.columns[1]])
+        st.dataframe(summary_df, use_container_width=True)
 
-    # ——— Display report ———
-    st.markdown(f"## Report for {sel_year}-{sel_month:02d}")
-    st.markdown("### 📊 Summary Report")
-    st.dataframe(summary)
-    st.markdown("### 💡 Estimated Tax")
-    st.info(f"💡 Estimated tax this month: Rp {est_tax:,.1f}")
-    st.markdown("### 🚦 Budget Alerts")
-    if not alerts:
-        st.write("No alerts!")
-    else:
-        for cat, amt in alerts:
-            st.write(f"- {cat}: Rp {amt:,.0f}")
+        st.markdown("### 💡 Estimated Tax")
+        st.info(f"Rp {est_tax:,.2f}")
+
+        st.markdown("### 🚦 Budget Alerts")
+        if not alerts:
+            st.write("No alerts 🎉")
+        else:
+            for cat, amt in alerts:
+                st.write(f"- {cat}: Rp {amt:,.0f}")

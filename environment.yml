@@ -1,10 +1,10 @@
 name: fintari_environment
 channels:
-  - conda-forge
   - snowflake
 dependencies:
   - python=3.11.*
   - snowflake-snowpark-python=
-  - streamlit
+  - streamlit=
   - scikit-learn
+  - fpdf
   - pip
