@@ -221,8 +221,8 @@ else:
             sel_period = st.selectbox(
                 "Pick one of the last 3 months",
                 last_months,
-                index=last_months.index(st.session_state.get('sel_period_quick', last_months[-1])),
-                key="sel_period_quick"
+                index=last_months.index(st.session_state.get('sel_period', last_months[-1])),
+                key="sel_period"
             )
             year, month = map(int, sel_period.split("-"))
             filt1 = txns[
