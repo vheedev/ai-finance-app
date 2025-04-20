@@ -158,7 +158,7 @@ else:
     with col_right:
     if st.button("➕ Add New Data", key="add_new_data_btn"):
         st.session_state.show_add_form = True
-    with c2:
+    
         # Generate summary and PDF for all transactions
         summary_all = show_summary(txns)
         est_tax_all = calculate_tax(txns)
