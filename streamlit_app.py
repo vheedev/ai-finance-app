@@ -117,10 +117,6 @@ else:
 
     st.success(f"Welcome, {st.session_state.username}!")
 
-    if txns.empty:
-    st.warning("No real transaction data found. Showing dummy data for demo purposes.")
-    txns = make_dummy_transactions()
-    
     # Fetch all transactions
     local_txns    = fetch_all_transactions(st.session_state.username)
     bca_txns      = fetch_bca_transactions(st.session_state.username)
@@ -144,6 +140,10 @@ else:
         moka_txns
     ], ignore_index=True)
     txns["date"] = pd.to_datetime(txns['date'])
+
+    if txns.empty:
+    st.warning("No real transaction data found. Showing dummy data for demo purposes.")
+    txns = make_dummy_transactions()
 
     # Prepare periods
     today = datetime.today().date()
