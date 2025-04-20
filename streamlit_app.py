@@ -144,51 +144,50 @@ else:
         (first_of_month - pd.DateOffset(months=i)).strftime("%Y-%m")
         for i in range(3, 0, -1)
     ]
-    else:
-        # --------- Top Row: Add New Data button (left) and Download PDF (right) ---------
-        col_left, col_right = st.columns([7, 3])
-        with col_left:
-            if st.button("➕ Add New Data", key="add_new_data_btn"):
-                st.session_state.show_add_form = True
-        with col_right:
-            # Generate summary and PDF for all transactions
-            summary_all = show_summary(txns)
-            est_tax_all = calculate_tax(txns)
-            alerts_all  = check_budget_limits(txns)
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font("Arial", "B", 16)
-            pdf.cell(0, 10, "Financial Report", ln=1, align="C")
-            pdf.set_font("Arial", "", 12)
-            pdf.cell(0, 8, f"User: {st.session_state.username}", ln=1)
-            pdf.cell(0, 8, f"Period: ALL", ln=1)
-            pdf.ln(5)
-            pdf.set_font("Arial", "B", 12)
-            pdf.cell(0, 8, "Summary Statistics", ln=1)
-            pdf.set_font("Arial", "", 10)
-            for idx, row in summary_all.round(2).iterrows():
-                line = ", ".join(f"{col}={row[col]}" for col in summary_all.columns)
-                pdf.cell(0, 6, f"{idx}: {line}", ln=1)
-            pdf.ln(5)
-            pdf.set_font("Arial", "B", 12)
-            pdf.cell(0, 8, f"Estimated Tax (10%): Rp {est_tax_all:,.2f}", ln=1)
-            pdf.ln(3)
-            pdf.set_font("Arial", "B", 12)
-            pdf.cell(0, 8, "Budget Alerts:", ln=1)
-            pdf.set_font("Arial", "", 10)
-            if not alerts_all:
-                pdf.cell(0, 6, "None", ln=1)
-            else:
-                for cat, amt in alerts_all:
-                    pdf.cell(0, 6, f"- {cat}: Rp {amt:,.0f}", ln=1)
-            pdf_bytes_all = pdf.output(dest="S").encode("latin-1")
-            st.download_button(
-                label="⬇️ Download Report",
-                data=pdf_bytes_all,
-                file_name="financial_report.pdf",
-                mime="application/pdf",
-                key="download_pdf_homepage"
-            )
+    # --------- Top Row: Add New Data button (left) and Download PDF (right) ---------
+    col_left, col_right = st.columns([7, 3])
+    with col_left:
+        if st.button("➕ Add New Data", key="add_new_data_btn"):
+            st.session_state.show_add_form = True
+    with col_right:
+        # Generate summary and PDF for all transactions
+        summary_all = show_summary(txns)
+        est_tax_all = calculate_tax(txns)
+        alerts_all  = check_budget_limits(txns)
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", "B", 16)
+        pdf.cell(0, 10, "Financial Report", ln=1, align="C")
+        pdf.set_font("Arial", "", 12)
+        pdf.cell(0, 8, f"User: {st.session_state.username}", ln=1)
+        pdf.cell(0, 8, f"Period: ALL", ln=1)
+        pdf.ln(5)
+        pdf.set_font("Arial", "B", 12)
+        pdf.cell(0, 8, "Summary Statistics", ln=1)
+        pdf.set_font("Arial", "", 10)
+        for idx, row in summary_all.round(2).iterrows():
+            line = ", ".join(f"{col}={row[col]}" for col in summary_all.columns)
+            pdf.cell(0, 6, f"{idx}: {line}", ln=1)
+        pdf.ln(5)
+        pdf.set_font("Arial", "B", 12)
+        pdf.cell(0, 8, f"Estimated Tax (10%): Rp {est_tax_all:,.2f}", ln=1)
+        pdf.ln(3)
+        pdf.set_font("Arial", "B", 12)
+        pdf.cell(0, 8, "Budget Alerts:", ln=1)
+        pdf.set_font("Arial", "", 10)
+        if not alerts_all:
+            pdf.cell(0, 6, "None", ln=1)
+        else:
+            for cat, amt in alerts_all:
+                pdf.cell(0, 6, f"- {cat}: Rp {amt:,.0f}", ln=1)
+        pdf_bytes_all = pdf.output(dest="S").encode("latin-1")
+        st.download_button(
+            label="⬇️ Download Report",
+            data=pdf_bytes_all,
+            file_name="financial_report.pdf",
+            mime="application/pdf",
+            key="download_pdf_homepage"
+        )
 
         # --- Show Add Form or Main Dashboard ---
         if st.session_state.get("show_add_form", False):
