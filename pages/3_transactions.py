@@ -2,6 +2,10 @@ import streamlit as st
 from datetime import date
 from add_transaction import add_transaction, fetch_all_transactions
 
+# Inject custom CSS
+with open("static/style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    
 st.title("💸 Transactions")
 
 username = st.session_state.get("username", "demo_user")

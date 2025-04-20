@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 from fpdf import FPDF
 
+# Inject custom CSS
+with open("static/style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    
 st.title("📄 Reports & Export")
 
 # Example dummy report button

@@ -2,6 +2,10 @@ import streamlit as st
 import json
 from uuid import uuid4
 
+# Inject custom CSS
+with open("static/style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 st.title("🗂️ Category Management")
 
 if "categories" not in st.session_state:

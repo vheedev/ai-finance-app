@@ -3,6 +3,10 @@ from datetime import datetime
 from add_transaction import fetch_all_transactions, show_summary, calculate_tax, check_budget_limits
 from finance_insights import forecast_next_month_expense, suggest_budget, detect_recurring
 
+# Inject custom CSS
+with open("static/style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 st.title("📊 Dashboard")
 st.write("Your latest financial overview and smart AI insights.")
 
