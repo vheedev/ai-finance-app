@@ -9,6 +9,16 @@ body {
     color: #fff;
 }
 
+# In your static/style.css
+img.logo {
+    margin-top: 20px;
+}
+
+/* In static/style.css */
+[data-testid="stImage"] img {
+    margin-top: 20px !important;
+}
+
 /* Custom button */
 .stButton button {
     background-color: #4f8cff;
