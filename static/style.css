@@ -1,0 +1,30 @@
+/* Main background */
+body {
+    background-color: #f8fafc;
+}
+
+/* Card-style container */
+.stApp > header {
+    background: #0d1c2e;
+    color: #fff;
+}
+
+/* Custom button */
+.stButton button {
+    background-color: #4f8cff;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 18px;
+    border: none;
+    font-weight: 700;
+}
+
+/* Category color badge */
+.category-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 0.8em;
+    margin-right: 6px;
+}
