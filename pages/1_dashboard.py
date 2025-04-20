@@ -7,6 +7,15 @@ from finance_insights import forecast_next_month_expense, suggest_budget, detect
 with open("static/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+# Insert the welcome banner/header here
+st.markdown("""
+<div style='background: #e8f0fe; border-radius: 10px; padding: 20px; margin-bottom:16px;'>
+    <h2 style='color:#1a237e'>AI Finance Dashboard</h2>
+    <p>Welcome, <b>{}</b>! Your personalized overview.</p>
+</div>
+""".format(st.session_state.get("username","Guest")), unsafe_allow_html=True)
+
+
 st.title("📊 Dashboard")
 st.write("Your latest financial overview and smart AI insights.")
 
