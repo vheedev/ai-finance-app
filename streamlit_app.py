@@ -319,4 +319,3 @@ else:
                 st.write("No recurring transactions detected.")
             else:
                 st.dataframe(recurring, use_container_width=True)
-    st.dataframe(recurring, use_container_width=True)
