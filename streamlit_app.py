@@ -247,11 +247,11 @@ else:
         alerts  = check_budget_limits(filtered)
 
         st.markdown("### 📊 Summary Report")
-        summary_df = summary.reset_index()
-        if len(summary_df.columns) == 2:
-            summary_df.columns = ["Category", "Total Amount"]
-        st.bar_chart(summary_df.set_index(summary_df.columns[0])[summary_df.columns[1]])
-        st.dataframe(summary_df, use_container_width=True)
+        summary1_df = summary1.reset_index()
+        if len(summary1_df.columns) == 2:
+            summary1_df.columns = ["Category", "Total Amount"]
+        st.bar_chart(summary1_df.set_index(summary1_df.columns[0])[summary1_df.columns[1]])
+        st.dataframe(summary1_df, use_container_width=True)
 
         st.markdown("### 💡 Estimated Tax")
         st.info(f"Rp {est_tax:,.2f}")
