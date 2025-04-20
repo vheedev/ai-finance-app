@@ -6,6 +6,16 @@ from add_transaction import add_transaction, fetch_all_transactions
 with open("static/style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+if "username" not in st.session_state:
+    st.warning("Please log in to see the dashboard.")
+    st.stop()
+
+# Place the Logout button right after login check
+if st.button("Logout"):
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.experimental_rerun()
+
 st.markdown("""
 <div style='background: #e8f0fe; border-radius: 10px; padding: 20px; margin-bottom:16px;'>
     <h2 style='color:#1a237e'>AI Finance Dashboard</h2>
